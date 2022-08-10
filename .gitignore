@@ -1,0 +1,15 @@
+# ignore ALL files. For macOS Finder hidden files
+*
+# Unignore all files with extensions
+!*.*
+# unignore directories
+!*/
+# unignore makefiles
+!Makefile
+# re-ignore object files s
+*.o
+
+
+**/.DS_Store
+**/.env
+**/.vscode
