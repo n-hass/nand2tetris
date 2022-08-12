@@ -9,7 +9,10 @@
 # re-ignore object files s
 *.o
 
-
 **/.DS_Store
 **/.env
 **/.vscode
+
+# ignore script outputs
+**/*.out
+"csadelaide-nand2tetris/tools/bin/Hardware Simulator.dat"

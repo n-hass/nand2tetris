@@ -42,5 +42,29 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // computation of alternate x inputs
+    Mux16(a=x, b=false, sel=zx, out=x1); // zero x input if zx
+    Not16(in=x1, out=x2); // flip x
+    Mux16(a=x1, b=x2, sel=nx, out=xA); // choose flipped x if nx
+
+    // computation of alternate y inputs
+    Mux16(a=y, b=false, sel=zy, out=y1);
+    Not16(in=y1, out=y2);
+    Mux16(a=y1, b=y2, sel=ny, out=yA);
+
+    // compute & and + functions then choose output
+    And16(a=xA, b=yA, out=f0);
+    Add16(a=xA, b=yA, out=f1);
+    Mux16(a=f0, b=f1, sel=f, out=fRes);
+
+    Not16(in=fRes, out=fNot);
+    Mux16(a=fRes, b=fNot, sel=no, out=fOut, out[15]=msb);
+
+    // compute zr and ng
+    And(a=true, b=msb, out=ng); // if MSB is 1, ng == true
+
+    Or16Way(in=fOut, out=zr0); // if all bits are 0, zr == false
+    Not(in=zr0, out=zr); // flip zr to match interface
+
+    And16(a=fOut, b=true, out=out); // connect the function output to the chip output
 }
