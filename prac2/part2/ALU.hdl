@@ -63,8 +63,9 @@ CHIP ALU {
     // compute zr and ng
     And(a=true, b=msb, out=ng); // if MSB is 1, ng == true
 
-    Or16Way(in=fOut, out=zr0); // if all bits are 0, zr == false
-    Not(in=zr0, out=zr); // flip zr to match interface
+    Or16Way(in=fOut, out=zr0); // if all bits are 0, output is false
+    Not(in=zr0, out=zr); // flip zr0 to match interface so zr is true when all bits are 0
 
-    And16(a=fOut, b=true, out=out); // connect the function output to the chip output
+    // connect the function output to the chip output
+    And16(a=fOut, b=true, out=out);
 }
