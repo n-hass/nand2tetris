@@ -27,5 +27,12 @@ CHIP Jump {
     OUT jump;           // true if a jump should be performed, false otherwise 
 
 PARTS:
-    // Put your code here:
+    And(a=j1, b=ng, out=jng);
+    And(a=j2, b=zr, out=jzr);
+
+    Not(in=ng, out=ngN);
+    And(a=j3, b=ngN, out=jps);
+
+    Or(a=jng, b=jzr, out=i0);
+    Or(a=i0, b=jps, out=jump);
 }
