@@ -27,12 +27,16 @@ CHIP Jump {
     OUT jump;           // true if a jump should be performed, false otherwise 
 
 PARTS:
+    // neg and 0 jump conds
     And(a=j1, b=ng, out=jng);
     And(a=j2, b=zr, out=jzr);
 
-    Not(in=ng, out=ngN);
-    And(a=j3, b=ngN, out=jps);
+    // +ve jump cond
+    Or(a=ng, b=zr, out=le0); // logic, if less than or equal 0
+    Not(in=le0, out=psv); // inverse of above
+    And(a=j3, b=psv, out=jps); // j3 bit only when > 0
 
+    // test if a cond is met and therefore must jump bit
     Or(a=jng, b=jzr, out=i0);
     Or(a=i0, b=jps, out=jump);
 }
