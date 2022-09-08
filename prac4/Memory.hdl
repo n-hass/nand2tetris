@@ -27,6 +27,18 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // determine areas of memory to operate on
-    
+    /*
+        RAM: 0-16383            0x0000 - 0x3FFF
+        Screen: 16384-24575     0x4000 - 0x5FFF
+        Keyboard: 24576         0x6000
+    */
+    DMux4Way(in=load, sel=address[13..14], a=ramLoadA, b=ramLoadB, c=screenLoad, d=waste); // split the load according to above 
+    Or(a=ramLoadA, b=ramLoadB, out=ramLoad); // combine ramLoad outputs as side-effect from split above
+
+    RAM16K(in=in, load=ramLoad, address=address[0..13], out=ramOut); // RAM access
+    Screen(in=in, load=screenLoad, address=address[0..12], out=screenOut); // screen access
+    Keyboard(out=keybOut); // keyboard access
+
+    // recombine outputs based on split
+    Mux4Way16(a=ramOut, b=ramOut, c=screenOut, d=keybOut, sel=address[13..14], out=out);
 }

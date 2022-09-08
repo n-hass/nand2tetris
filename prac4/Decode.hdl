@@ -25,5 +25,34 @@ CHIP Decode {
         j1,j2,j3;           // Jump wires
 
 PARTS:
-    // Put your code here:
+    And(a=in[15], b=true, out=type, out=inst);
+
+    // Mux(a=false, b=in[1], sel=inst, out=a);
+    // Mux(a=false, b=in[2], sel=inst, out=c1);
+    // Mux(a=false, b=in[3], sel=inst, out=c2);
+    // Mux(a=false, b=in[4], sel=inst, out=c3);
+    // Mux(a=false, b=in[5], sel=inst, out=c4);
+    // Mux(a=false, b=in[6], sel=inst, out=c5);
+    // Mux(a=false, b=in[7], sel=inst, out=c6);
+    // Mux(a=true, b=in[8], sel=inst, out=d1);
+    // Mux(a=false, b=in[9], sel=inst, out=d2);
+    // Mux(a=false, b=in[10], sel=inst, out=d3);
+    // Mux(a=false, b=in[11], sel=inst, out=j1);
+    // Mux(a=false, b=in[12], sel=inst, out=j2);
+    // Mux(a=false, b=in[13], sel=inst, out=j3);
+
+    Mux(a=false, b=in[12], sel=inst, out=a);
+    Mux(a=false, b=in[11], sel=inst, out=c1);
+    Mux(a=false, b=in[10], sel=inst, out=c2);
+    Mux(a=false, b=in[9], sel=inst, out=c3);
+    Mux(a=false, b=in[8], sel=inst, out=c4);
+    Mux(a=false, b=in[7], sel=inst, out=c5);
+    Mux(a=false, b=in[6], sel=inst, out=c6);
+    Mux(a=true, b=in[5], sel=inst, out=d1);
+    Mux(a=false, b=in[4], sel=inst, out=d2);
+    Mux(a=false, b=in[3], sel=inst, out=d3);
+    Mux(a=false, b=in[2], sel=inst, out=j1);
+    Mux(a=false, b=in[1], sel=inst, out=j2);
+    Mux(a=false, b=in[0], sel=inst, out=j3);
+
 }
