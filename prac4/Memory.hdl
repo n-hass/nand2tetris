@@ -28,25 +28,5 @@ CHIP Memory {
 
     PARTS:
     // determine areas of memory to operate on
-    DMux(in=true, sel=address[14], a=ram, b=scr_keyb);
-
-    DMux(in=scr_keyb, sel=address[13], a=scr, b=keyb);
-
-    // main memory access logic
-    And(a=load, b=ram, out=refRam);
-    RAM16K(in=in, load=refRam, address=address[0..13], out=ramOut);
-
-    // screen change logic
-    DMux(in=scr, sel=address[12], a=px_L, b=px_H);
-    And(a=load, b=px_L, out=pxL_o);
-    And(a=load, b=px_H, out=pxH_o);
-    RAM4K(in=in, load=pxL_o, address=address[0..11], out=pxLOut);
-    RAM4K(in=in, load=pxH_o, address=address[0..11], out=pxHOut);
-    Mux16(a=pxLOut, b=pxHOut, sel=px_H, out=scrOut);
-
-    // keyboard memory mapping logic
-    And(a=load, b=keyb, out=refKeyb);
-    Register(in=in, load=refKeyb, out=resKeyb);
-    Mux16(a=scrOut, b=resKeyb, sel=refKeyb, out=scr_keybOut);
-    Mux16(a=ramOut, b=scr_keybOut, sel=scr_keyb, out=out);
+    
 }
