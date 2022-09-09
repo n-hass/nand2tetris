@@ -45,8 +45,7 @@ CHIP CPU {
     Mux16(a=ALUout, b=instruction, sel=Ninst, out=Aregin);
     ARegister(in=Aregin, load=d1, out=Aregout, out[0..14]=addressM);
     
-    And(a=d2, b=inst, out=Dload);
-    DRegister(in=ALUout, load=Dload, out=Dregout);
+    DRegister(in=ALUout, load=d2, out=Dregout);
 
     And(a=inst, b=d3, out=writeM); // write to memory if a c-instruction and d3 is set
 
