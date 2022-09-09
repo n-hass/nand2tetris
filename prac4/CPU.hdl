@@ -40,19 +40,17 @@ CHIP CPU {
 
     PARTS:
     Decode(in=instruction, type=inst, a=a, c1=c1, c2=c2, c3=c3, c4=c4, c5=c5, c6=c6, d1=d1, d2=d2, d3=d3, j1=j1, j2=j2, j3=j3);
-    Not(in=inst, out=Ninst);
-
-    Mux16(a=ALUout, b=instruction, sel=Ninst, out=Aregin);
-    ARegister(in=Aregin, load=d1, out=Aregout, out[0..14]=addressM);
-    
-    DRegister(in=ALUout, load=d2, out=Dregout);
-
     And(a=inst, b=d3, out=writeM); // write to memory if a c-instruction and d3 is set
 
-    Mux16(a=Aregout, b=inM, sel=a, out=ALUinB);
-    ALU(x=Dregout, y=ALUinB, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=ALUout, out=outM, zr=zr, ng=ng); 
+    Mux16(a=instruction, b=ALUout, sel=inst, out=Aregin); // select the instruction (if A-inst) or the ALU output (if C-inst) as input to the A-register
+    ARegister(in=Aregin, load=d1, out=Aregout, out[0..14]=addressM);
+    
+    DRegister(in=ALUout, load=d2, out=ALUinA);
 
-    Jump(j1=j1, j2=j2, j3=j3, zr=zr, ng=ng, jump=JUMPout);
+    Mux16(a=Aregout, b=inM, sel=a, out=ALUinB); // AKA the 'A/M' input selector
+    ALU(x=ALUinA, y=ALUinB, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=ALUout, out=outM, zr=zr, ng=ng); 
+
+    Jump(j1=j1, j2=j2, j3=j3, zr=zr, ng=ng, jump=JUMPout); // outputs a true (-1) load signal when a jump is necessary
     PC(in=Aregout, load=JUMPout, inc=true, reset=reset, out[0..14]=pc);
-
+    
 }
