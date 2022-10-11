@@ -29,7 +29,7 @@ Assembler::~Assembler() {
  * @param numOfInst number of inststructions
  */
 void Assembler::doFirstPass(SymbolTable* symbolTable, string instructions[], int numOfInst) {
-    int j=0;
+    int j=1;
     for (int i=0; i<numOfInst; i++) {
 
         if ( parseInstructionType(instructions[i]) == L_INSTRUCTION ) {
