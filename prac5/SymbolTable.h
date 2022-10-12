@@ -12,7 +12,7 @@ class SymbolTable {
     SymbolTable();
     ~SymbolTable();
 
-    bool entry(string symbol);
+    bool newVar(string symbol);
     void addSymbol(string symbol, u16 value);
     int getSymbol(string symbol);
 

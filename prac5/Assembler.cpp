@@ -7,6 +7,25 @@
 
 using namespace std;
 
+bool str_contains(const string& a, const char& b) {
+	if (a.find(b) == string::npos)
+		return false;
+	return true;
+}
+bool str_contains(const string& a, const string& b) {
+	if (a.find(b) == string::npos)
+		return false;
+	return true;
+}
+
+void eraseSubStr(string& a, const string& b) {
+	size_t pos = a.find(b);
+
+	if (pos != string::npos)
+		a.erase(pos, b.length());
+	
+}
+
 /**
  * Assembler constructor
  */
@@ -29,12 +48,16 @@ Assembler::~Assembler() {
  * @param numOfInst number of inststructions
  */
 void Assembler::doFirstPass(SymbolTable* symbolTable, string instructions[], int numOfInst) {
-    int j=1;
+    int j=0;
     for (int i=0; i<numOfInst; i++) {
 
+				if(str_contains(instructions[i],'\r') && instructions[i].length() == 1)
+					continue;
+
         if ( parseInstructionType(instructions[i]) == L_INSTRUCTION ) {
+						string l = instructions[i];
             symbolTable->addSymbol (
-                instructions[i].substr(1, instructions[i].length()-2) , j
+                instructions[i].substr(l.find_first_of('(')+1, l.find_last_of(')') - l.find_first_of('(') - 1) , j
             );
         } 
         else j++;
@@ -51,22 +74,28 @@ void Assembler::doFirstPass(SymbolTable* symbolTable, string instructions[], int
 string Assembler::doSecondPass(SymbolTable* symbolTable, string instructions[], int numOfInst) {
 		this->ST = symbolTable;
     string code = "";
+		string comp,dest,jump, original;
 
     for (int i=0; i<numOfInst; i++) {
         string ln = instructions[i];
+				original = ln;
 
         switch (parseInstructionType(ln)){
-            case A_INSTRUCTION:
-                ln = parseAInst(ln);
-								code = code+"\n"+ln;
-            break;
+          case A_INSTRUCTION:
+            ln = parseAInst(ln);
+						code = code+"\n"+ln;
+          break;
             
-            case C_INSTRUCTION:
-                ln = parseCInst(ln);
-								code = code+"\n"+ln;
-            break;
+          case C_INSTRUCTION:
+          	ln = parseCInst(ln);
+						comp = ln.substr(3,7);
+						dest = ln.substr(10,3);
+						jump = ln.substr(13,3);
+
+						code = code+"\n"+ln;
+          break;
             
-            default: break; // do nothing
+          default: break; // do nothing
         }
 
         
@@ -125,19 +154,19 @@ Assembler::InstructionDest Assembler::parseInstructionDest(string inst) {
 Assembler::InstructionJump Assembler::parseInstructionJump(string inst) {
     // Your code here:
     // for example if "JLT" appear at the comp field return enum label JLT
-   if (inst == "JLT")
+   if (str_contains(inst, "JLT"))
       return JLT;
-   if (inst == "JGT")
+   if (str_contains(inst, "JGT"))
       return JGT;
-   if (inst == "JEQ")
+   if (str_contains(inst, "JEQ"))
       return JEQ;
-   if (inst == "JLE")
+   if (str_contains(inst, "JLE"))
       return JLE;
-   if (inst == "JGE")
+   if (str_contains(inst, "JGE"))
       return JGE;
-   if (inst == "JNE")
+   if (str_contains(inst, "JNE"))
       return JNE;
-   if (inst == "JMP")
+   if (str_contains(inst, "JMP"))
       return JMP;
 
    return NULL_JUMP;
@@ -170,7 +199,9 @@ Assembler::InstructionComp Assembler::parseInstructionComp(string inst) {
  */
 string Assembler::parseSymbol(string inst) {
 	auto type = parseInstructionType(inst);
+	eraseSubStr(inst, "\r");
 	
+
 	inst.erase(0,1);
 	if (type == L_INSTRUCTION) {
 		inst.pop_back();
@@ -233,7 +264,7 @@ string Assembler::translateSymbol(string symbol, SymbolTable* symbolTable) {
 	else { // is a symbol
 		int symcode = ST->getSymbol(AVal);
 		if (parseInstructionType(symbol) == A_INSTRUCTION && symcode == -1) { // is an a instruction and symbol not in table
-			ST->entry(AVal);
+			ST->newVar(AVal);
 			symcode = ST->getSymbol(AVal);
 		}
 		return bitset<15>(symcode).to_string();

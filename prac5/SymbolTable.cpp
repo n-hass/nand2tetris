@@ -63,7 +63,7 @@ void SymbolTable::addSymbol(string symbol, uint16_t value) {
  * @param symbol The name of the symbol
  * @param value The address for the symbol
  */
-bool SymbolTable::entry(string symbol) {
+bool SymbolTable::newVar(string symbol) {
     if (t.find(symbol) == t.end()) { // symbol not in the table yet
         this->addSymbol(symbol, tN);
         tN++;
