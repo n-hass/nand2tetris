@@ -48,20 +48,22 @@ Assembler::~Assembler() {
  * @param numOfInst number of inststructions
  */
 void Assembler::doFirstPass(SymbolTable* symbolTable, string instructions[], int numOfInst) {
-    int j=0;
-    for (int i=0; i<numOfInst; i++) {
+	int j=0;
+	for (int i=0; i<numOfInst; i++) {
 
-				if(str_contains(instructions[i],'\r') && instructions[i].length() == 1)
-					continue;
+		if(str_contains(instructions[i],'\r') && instructions[i].length() == 1)
+			continue;
+		if (instructions[i] == "")
+			continue;
 
-        if ( parseInstructionType(instructions[i]) == L_INSTRUCTION ) {
-						string l = instructions[i];
-            symbolTable->addSymbol (
-                instructions[i].substr(l.find_first_of('(')+1, l.find_last_of(')') - l.find_first_of('(') - 1) , j+1
-            );
-        } 
-        else j++;
-    }
+		if ( parseInstructionType(instructions[i]) == L_INSTRUCTION ) {
+			string l = instructions[i];
+			symbolTable->addSymbol (
+				instructions[i].substr(l.find_first_of('(')+1, l.find_last_of(')') - l.find_first_of('(') - 1) , j
+			);
+		} 
+		else j++;
+	}
 }
 
 /**

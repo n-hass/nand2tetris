@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     // Open file
     fstream file;
-    file.open("/Users/nh/My Drive (nickhassan01@gmail.com)/Uni/programs/2022/s2/cs/prac5/tests/Mult.asm", ios::in);
+    file.open("/Users/nh/My Drive (nickhassan01@gmail.com)/Uni/programs/2022/s2/cs/prac5/tests/Add1to100.asm", ios::in);
     
     // Read line-by-line
     string line;
@@ -50,5 +50,10 @@ int main(int argc, char** argv) {
     string code = assembler.doSecondPass(&symbolTable, instructions, instructionList.size());
     // Print output
     cout << code << endl;
+
+    ofstream output;
+    output.open("out.hack");
+    output << code;
+    output.close();
     
 }
