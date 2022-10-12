@@ -7,6 +7,8 @@
 
 using namespace std;
 
+int varCounter = 16;
+
 bool str_contains(const string& a, const char& b) {
 	if (a.find(b) == string::npos)
 		return false;
@@ -268,6 +270,9 @@ string Assembler::translateSymbol(string symbol, SymbolTable* symbolTable) {
 		if (parseInstructionType(symbol) == A_INSTRUCTION && symcode == -1) { // is an a instruction and symbol not in table
 			ST->newVar(AVal);
 			symcode = ST->getSymbol(AVal);
+			if (varCounter != symcode)
+				return "broken!"; // for debugging
+			varCounter++;
 		}
 		return bitset<15>(symcode).to_string();
 	}

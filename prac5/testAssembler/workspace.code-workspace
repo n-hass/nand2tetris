@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"iostream": "cpp",
+			"fstream": "cpp",
+			"ostream": "cpp",
+			"map": "cpp",
+			"string": "cpp",
+			"stdexcept": "cpp",
+			"*.tcc": "cpp",
+			"iosfwd": "cpp",
+			"array": "cpp",
+			"deque": "cpp",
+			"vector": "cpp",
+			"initializer_list": "cpp",
+			"string_view": "cpp",
+			"new": "cpp",
+			"concepts": "cpp",
+			"algorithm": "cpp",
+			"bitset": "cpp",
+			"queue": "cpp"
+		}
+	}
+}
