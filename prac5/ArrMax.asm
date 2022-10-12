@@ -2,8 +2,15 @@
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 
 // initalise
-      // store the first array element value
-@R1 
+@R0
+M=0      
+@R2 // if the array is of length 0 or less, just output 0
+D=M
+@END
+D; JLE
+// perform the max 
+
+@R1     // store the first array element value
 A=M // dereference the pointer at R1
 D=M // store the value (RAM[R1]) in D
 @R0 
