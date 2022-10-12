@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     // Open file
     fstream file;
-    file.open("/Users/nh/My Drive (nickhassan01@gmail.com)/Uni/programs/2022/s2/cs/prac5/tests/Max.asm", ios::in);
+    file.open("/Users/nh/My Drive (nickhassan01@gmail.com)/Uni/programs/2022/s2/cs/prac5/tests/Mult.asm", ios::in);
     
     // Read line-by-line
     string line;

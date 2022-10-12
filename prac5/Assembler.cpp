@@ -57,7 +57,7 @@ void Assembler::doFirstPass(SymbolTable* symbolTable, string instructions[], int
         if ( parseInstructionType(instructions[i]) == L_INSTRUCTION ) {
 						string l = instructions[i];
             symbolTable->addSymbol (
-                instructions[i].substr(l.find_first_of('(')+1, l.find_last_of(')') - l.find_first_of('(') - 1) , j
+                instructions[i].substr(l.find_first_of('(')+1, l.find_last_of(')') - l.find_first_of('(') - 1) , j+1
             );
         } 
         else j++;
