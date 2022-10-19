@@ -1,9 +1,24 @@
 // Calculates y = |x|
 // x & y are static variables
 
-// Put your code here.
+push static 0
+push constant 0
+lt
+if-goto FLIP
 
+push static 0
+goto POST
+
+
+label FLIP
+  push static 0
+  neg
+  goto POST
+
+label POST
+  pop static 1
+  goto END
 
 
 label END
-goto END
+  goto END
