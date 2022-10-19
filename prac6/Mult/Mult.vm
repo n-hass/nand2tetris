@@ -14,13 +14,41 @@ neg
 pop temp 0
 
 // calc abs of the inputs and store in temp 1 and 2
-push static 0
-call Mult.abs 1
-pop temp 1
-push static 1
-call Mult.abs 1
-pop temp 2
 
+// some bullshit extra code because Mult.abs function wont cause it mucks the local pointer and i cant pop to local 0
+label TEST_A
+  push static 0
+  // call Mult.abs 1
+  push constant 0
+  lt
+  if-goto FLIP_A
+  push static 0
+  pop temp 1
+  goto TEST_B
+
+label TEST_B
+  push static 1
+  // call Mult.abs 1
+  push constant 0
+  lt
+  if-goto FLIP_B
+  push static 1
+  pop temp 2
+  goto FIN_ARGS
+
+label FLIP_A
+  push static 0
+  neg
+  pop temp 1
+  goto TEST_B
+
+label FLIP_B
+  push static 1
+  neg
+  pop temp 2
+  goto FIN_ARGS
+
+label FIN_ARGS
 // set up the loop
 push constant 1
 pop temp 3 // temp 3 is the loop counter
@@ -63,14 +91,16 @@ label NEG_CHECK
   push temp 0
   push constant 1
   eq
-  if-goto FLIP
+  if-goto FLIP_R
   goto POST
 
-label FLIP
+label FLIP_R
   neg
   goto POST
 
 label POST
+  pop temp 5
+  push temp 5
   pop local 0
   goto END
 
