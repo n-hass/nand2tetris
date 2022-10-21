@@ -1,0 +1,96 @@
+// Calculates a = x*y
+// a is a local variable
+// x & y are static variables
+
+// test the signs of the inputs
+push static 0
+pop local 0
+
+function MultWfunc.mult 0
+push constant 0
+push static 0
+gt
+push constant 0
+push static 1
+gt
+add
+neg
+pop temp 0
+
+// calc abs of the inputs and store in temp 1 and 2
+push static 0
+call MultWfunc.abs 1
+pop temp 1
+push static 1
+call MultWfunc.abs 1
+pop temp 2
+
+// set up the loop
+push constant 1
+pop temp 3 // temp 3 is the loop counter
+
+// optimise by placing the larger parameter in temp 1 as base, smaller in temp 2 as incrementor
+push temp 1
+push temp 2
+lt
+if-goto SWAP_TEMPS
+goto PRE
+
+label SWAP_TEMPS
+push temp 1
+pop temp 4
+push temp 2
+pop temp 1
+push temp 4
+pop temp 2
+goto PRE
+
+label PRE
+push constant 0 // this is 'top' of the stack for the loop, it will be the cumulative result
+
+label LOOP
+push temp 2
+push temp 3
+lt
+if-goto NEG_CHECK
+push temp 3
+push constant 1
+add
+pop temp 3
+push temp 1
+add
+goto LOOP
+
+
+label NEG_CHECK
+// handle negatives
+push temp 0
+push constant 1
+eq
+if-goto FLIP
+goto POST
+
+label FLIP
+neg
+goto POST
+
+label POST
+pop local 0
+push local 0
+return
+
+
+
+function MultWfunc.abs 1
+push argument 0
+push constant 0
+lt
+if-goto FLIP
+push argument 0
+goto POST
+label FLIP
+push argument 0
+neg
+goto POST
+label POST
+return
