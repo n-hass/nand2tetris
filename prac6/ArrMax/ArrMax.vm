@@ -3,3 +3,60 @@
 
 // Put your code here.
 
+function ArrMax.arrMax 2
+push argument 1
+push constant 1
+lt
+if-goto EMPTY
+
+push argument 0   // get array base
+pop pointer 1     // put address from above into pointer 1
+push that 0       // dereference value at address
+pop temp 0        // store first array element as the current maximum in temp 0
+
+push constant 0
+pop temp 1        // array iterator
+
+push argument 1
+push constant 1
+sub
+pop temp 2        // comparison value (array length-1)
+goto LOOP
+
+// comparison loop begins
+label LOOP
+push temp 1
+push constant 1
+add
+pop temp 1        // update the iterator in temp 1
+push temp 1
+push temp 2
+gt
+if-goto POST_LOOP
+push argument 0
+push temp 1
+add
+pop pointer 1
+push that 0     // dereference arr[i]
+pop temp 3      // store current test value in temp 3 to save de-reffing twice
+//
+push temp 3
+push temp 0     // current max
+gt
+if-goto UPDATE_MAX
+goto LOOP
+//
+label UPDATE_MAX
+push temp 3
+pop temp 0      // update the current max
+goto LOOP
+
+
+label POST_LOOP
+push temp 0
+return
+
+
+label EMPTY // array size is <1
+push constant 0
+return
