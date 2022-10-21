@@ -8,6 +8,7 @@ push argument 0
 push constant 2
 lt
 if-goto BASE_CASE // if x <= 1, return x
+
 push argument 0   //
 push constant 1   //  Do:
 sub               //     fib(x-1)

@@ -1,8 +1,6 @@
 // Calculates a = x*y
 // a is a local variable
 // x & y are static variables
-
-// test the signs of the inputs
 push constant 0
 push static 0
 gt
@@ -14,8 +12,7 @@ neg
 pop temp 0
 
 // calc abs of the inputs and store in temp 1 and 2
-
-// some bullshit extra code because Mult.abs function wont cause it mucks the local pointer and i cant pop to local 0
+// ... a lot of extra code here because Mult.abs function wont cause it mucks the local pointer and i cant pop to local 0 ¯\_(ツ)_/¯
 label TEST_A
   push static 0
   // call Mult.abs 1
@@ -49,6 +46,7 @@ label FLIP_B
   goto FIN_ARGS
 
 label FIN_ARGS
+
 // set up the loop
 push constant 1
 pop temp 3 // temp 3 is the loop counter

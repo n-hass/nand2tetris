@@ -1,8 +1,43 @@
 #include <string>
 
 #include "VMTranslator.h"
+#include "Lines.hpp"
 
 using namespace std;
+
+// a single point of reference for 
+string VMTranslator::regDecode(string seg, int offset) {
+    if (seg == "this")
+        return "THIS";
+    if (seg == "that")
+        return "THAT";
+    if (seg == "static")
+        return "16";
+    if (seg == "argument")
+        return "ARG";
+    if (seg == "pointer")
+        return "R"+to_string(3 + offset);
+    if (seg == "local") 
+        return "R"+to_string(5 + offset);
+    
+    return "";
+}
+
+bool VMTranslator::validSegment(string segment) {
+    if (
+        segment == "constant" || 
+        segment == "static" || 
+        segment == "local" || 
+        segment == "this" ||
+        segment == "that" ||
+        segment == "temp" ||
+        segment == "pointer" ||
+        segment == "argument" )
+    {
+        return true;
+    }
+    return false;
+}
 
 /**
  * VMTranslator constructor
@@ -19,13 +54,91 @@ VMTranslator::~VMTranslator() {
 }
 
 /** Generate Hack Assembly code for a VM push operation */
-string VMTranslator::vm_push(string segment, int offset){
-    return "";
+string VMTranslator::vm_push(string segment, int offset) {
+    if (validSegment(segment) == false)
+        return "";
+
+    File out;
+    string reg = regDecode(segment, offset);
+    string ofs = to_string(offset);
+
+    if (segment == "constant") {
+    out.ins(  "@" + ofs, "push "+segment+" "+ofs );
+    out.ins(  "D=A"    );
+    out.ins(  "@SP"    );
+    out.ins(  "A=M"    );
+    out.ins(  "M=D"    );
+    out.ins(  "@SP"    );
+    out.ins(  "M=M+1"  );
+
+    }
+    else {
+        out.ins(  "@" + reg, "push "+segment+" "+ofs );
+        if (segment == "static") {
+        out.ins(  "D=A"    );
+        }
+        else if (
+            segment == "local" || 
+            segment == "this" ||
+            segment == "that" ||
+            segment == "temp" ||
+            segment == "pointer" ||
+            segment == "argument" ) { // all the same
+        out.ins(  "D=M"    );
+        }
+        out.ins(  "@"+ofs  );
+        out.ins(  "A=D+A"  );
+        out.ins(  "D=M"    );
+        out.ins(  "@SP"    );
+        out.ins(  "A=M"    );
+        out.ins(  "M=D"    );
+        out.ins(  "@SP"    );
+        out.ins(  "M=M+1"  );
+    }
+
+    return out.str();
 }
 
 /** Generate Hack Assembly code for a VM pop operation */
 string VMTranslator::vm_pop(string segment, int offset){    
-    return "";
+    if (validSegment(segment) == false)
+        return "";
+    
+    File out;
+    string reg = regDecode(segment, offset);
+    string ofs = to_string(offset);
+
+    if (segment == "constant") {
+        // error
+        return "";
+    }
+    else {
+        out.ins(  "@" + reg, "pop "+segment+" "+ofs );
+        if (segment == "static") {
+        out.ins(  "D=A"    );
+        }
+        else if (
+            segment == "local" || 
+            segment == "this" ||
+            segment == "that" ||
+            segment == "temp" ||
+            segment == "pointer" ||
+            segment == "argument" ) { // all the same
+        out.ins(  "D=M"    );
+        }
+        out.ins(  "@"+ofs  );
+        out.ins(  "D=D+A"  );
+        out.ins(  "@R13"   );
+        out.ins(  "M=D"    );
+        out.ins(  "@SP"    );
+        out.ins(  "AM=M-1" );
+        out.ins(  "D=M"    );
+        out.ins(  "@R13"   );
+        out.ins(  "A=M"    );
+        out.ins(  "M=D"    );
+    }
+
+    return out.str();
 }
 
 /** Generate Hack Assembly code for a VM add operation */

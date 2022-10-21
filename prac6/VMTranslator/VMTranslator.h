@@ -33,6 +33,11 @@ class VMTranslator {
         static string vm_function(string function_name, int n_vars);
         static string vm_call(string function_name, int n_args);
         static string vm_return();
+
+    private:
+
+        static string regDecode(string segment, int offset);
+        static bool validSegment(string segment);
         
 };
 
