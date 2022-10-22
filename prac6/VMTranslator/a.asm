@@ -1,8 +1,9 @@
-@a	// jump to a
-0;JMP
-@SP	// if-goto a
-AM=M-1
-D=M
-@a
-D;JNE
-(a)	// new label: a
+(myfoo)	// function declaration: myfoo 1
+@SP	
+A=M	
+// clearing the stack for function: myfoo
+M=0
+A=A+1
+D=A
+@SP
+M=D

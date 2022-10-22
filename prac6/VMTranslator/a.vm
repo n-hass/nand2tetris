@@ -1,3 +1,1 @@
-goto a
-if-goto a
-label a
+function myfoo 1

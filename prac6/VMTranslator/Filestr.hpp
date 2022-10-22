@@ -12,6 +12,10 @@ struct Filestr {
     // __a += in +"\n";
   }
 
+  inline void comment(const std::string &in) {
+    __a += "// "+ in +"\n";
+  }
+
   inline std::string str() {
     if (__a.back() == '\n') {
       __a.pop_back(); // consume a trailing newline, if it exists
