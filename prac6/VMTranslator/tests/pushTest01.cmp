@@ -1,0 +1,14 @@
+@20	// push constant 20
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R8	// push temp 3
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1

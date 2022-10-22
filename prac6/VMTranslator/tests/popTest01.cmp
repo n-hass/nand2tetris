@@ -1,0 +1,20 @@
+@R9	// pop pointer 6
+D=A
+@R13
+M=D
+@SP
+AM=M-1
+D=M
+@R13
+A=M
+M=D
+@R12	// pop temp 7
+D=A
+@R13
+M=D
+@SP
+AM=M-1
+D=M
+@R13
+A=M
+M=D

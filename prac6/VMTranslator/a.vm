@@ -1,9 +1,0 @@
-pop argument 1
-pop local 2
-
-pop static 3
-pop this 4
-
-pop that 5
-pop pointer 6
-pop temp 7

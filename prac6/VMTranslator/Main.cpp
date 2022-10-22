@@ -13,13 +13,20 @@ using namespace std;
 int main(int argc, char** argv){
 
     if(argc > 1){
+        
+        fstream infile;
+        infile.open(argv[1],ios::in);
+        
+        ofstream outfile;
+        string ofname (argv[1]);
+        ofname.erase(ofname.find(".vm"),3);
+        ofname.append(".asm");
+        outfile.open(ofname);
 
-        fstream file;
-        file.open(argv[1],ios::in);
-        if (file.is_open()){   
+        if (infile.is_open()){   
             VMTranslator vmt;
             string line;
-            while(getline(file, line)){
+            while(getline(infile, line)){
                 regex endl_re("\\r*\\n+");
                 regex space_re("\\s+");
                 line = regex_replace(line, endl_re, "");
@@ -34,32 +41,45 @@ int main(int argc, char** argv){
                 if(tokens.size()==1){
                     if(tokens[0]=="add"){
                         cout << vmt.vm_add() << endl;
+                        outfile << vmt.vm_add() << endl;
                     } else if(tokens[0]=="sub"){
                         cout << vmt.vm_sub() << endl;
+                        outfile << vmt.vm_sub() << endl;
                     } else if(tokens[0]=="neg"){
                         cout << vmt.vm_neg() << endl;
+                        outfile << vmt.vm_neg() << endl;
                     } else if(tokens[0]=="eq"){
                         cout << vmt.vm_eq() << endl;
+                        outfile << vmt.vm_eq() << endl;
                     } else if(tokens[0]=="gt"){
                         cout << vmt.vm_gt() << endl;
+                        outfile << vmt.vm_gt() << endl;
                     } else if(tokens[0]=="lt"){
                         cout << vmt.vm_lt() << endl;
+                        outfile << vmt.vm_lt() << endl;
                     } else if(tokens[0]=="and"){
                         cout << vmt.vm_and() << endl;
+                        outfile << vmt.vm_and() << endl;
                     } else if(tokens[0]=="or"){
                         cout << vmt.vm_or() << endl;
+                        outfile << vmt.vm_or() << endl;
                     } else if(tokens[0]=="not"){
                         cout << vmt.vm_not() << endl;
+                        outfile << vmt.vm_not() << endl;
                     } else if(tokens[0]=="return"){
                         cout << vmt.vm_return() << endl;
+                        outfile << vmt.vm_return() << endl;
                     }
                 } else if(tokens.size()==2){
                     if(tokens[0]=="label"){
                         cout << vmt.vm_label(tokens[1]) << endl;
+                        outfile << vmt.vm_label(tokens[1]) << endl;
                     } else if(tokens[0]=="goto"){
                         cout << vmt.vm_goto(tokens[1]) << endl;
+                        outfile << vmt.vm_goto(tokens[1]) << endl;
                     } else if(tokens[0]=="if-goto"){
                         cout << vmt.vm_if(tokens[1]) << endl;
+                        outfile << vmt.vm_if(tokens[1]) << endl;
                     }
                 } else if(tokens.size()==3){
                     int t2;
@@ -71,16 +91,21 @@ int main(int argc, char** argv){
                     }
                     if(tokens[0]=="push"){
                         cout << vmt.vm_push(tokens[1],t2) << endl;
+                        outfile << vmt.vm_push(tokens[1],t2) << endl;
                     } else if(tokens[0]=="pop"){
                         cout << vmt.vm_pop(tokens[1],t2) << endl;
+                        outfile << vmt.vm_pop(tokens[1],t2) << endl;
                     } else if(tokens[0]=="function"){
                         cout << vmt.vm_function(tokens[1],t2) << endl;
+                        outfile << vmt.vm_function(tokens[1],t2) << endl;
                     } else if(tokens[0]=="call"){
                         cout << vmt.vm_call(tokens[1],t2) << endl;
+                        outfile << vmt.vm_call(tokens[1],t2) << endl;
                     }
                 }
             }
-            file.close();
+            infile.close();
+            outfile.close();
         }
 
     }

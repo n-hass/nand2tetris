@@ -1,0 +1,17 @@
+@ARG	// push argument 4
+D=M
+@4
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@19	// push static 3
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1

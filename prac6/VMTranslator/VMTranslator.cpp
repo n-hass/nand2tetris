@@ -66,43 +66,39 @@ VMTranslator::~VMTranslator() {
 
 /** Generate Hack Assembly code for a VM push operation */
 string VMTranslator::vm_push(string segment, int offset) {
-    if (validSegment(segment) == false)
-        return "";
+	if (validSegment(segment) == false)
+		return "";
 
-    File out;
-    string reg = regDecode(segment, offset);
-    string ofs = to_string(offset);
+	File out;
+	string reg = regDecode(segment, offset);
+	string ofs = to_string(offset);
 
-    if (segment == "constant" || segment == "static") {
-    	out.ins(  "@" + reg, "push "+segment+" "+ofs );
-    	(segment=="static") ? out.ins("D=M") : out.ins("D=A");
-    } else {
-			if (
-					segment == "local" ||
-					segment == "this" ||
-					segment == "that" ||
-					segment == "argument" ||
-					segment == "local"
-				)
-			{
-				out.ins(  "@" + reg, "push "+segment+" "+ofs );
-				out.ins(  "D=M"    );
-				out.ins(  "@"+ofs  );
-				out.ins(  "A=D+A"  );
-      }
-			else if (segment == "pointer" || segment == "temp") {
-				out.ins(  "@" + reg, "push "+segment+" "+ofs );
-			}
+	if (segment == "constant" || segment == "static" ||
+			segment == "pointer" || segment == "temp") {
+		out.ins(  "@" + reg, "push "+segment+" "+ofs );
+		(segment=="constant") ? out.ins("D=A") : out.ins("D=M");
+	} 
+	else if (
+		segment == "local" ||
+		segment == "this" ||
+		segment == "that" ||
+		segment == "argument"
+		)
+	{
+		out.ins(  "@" + reg, "push "+segment+" "+ofs );
+		out.ins(  "D=M"    );
+		out.ins(  "@"+ofs  );
+		out.ins(  "A=D+A"  );
+		out.ins(  "D=M"    );
+	}
 
-			out.ins(  "D=M"    );
-    }
-		out.ins(  "@SP"    );
-		out.ins(  "A=M"    );
-		out.ins(  "M=D"    );
-		out.ins(  "@SP"    );
-		out.ins(  "M=M+1"  );
+	out.ins(  "@SP"    );
+	out.ins(  "A=M"    );
+	out.ins(  "M=D"    );
+	out.ins(  "@SP"    );
+	out.ins(  "M=M+1"  );
 
-    return out.str();
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM pop operation */
