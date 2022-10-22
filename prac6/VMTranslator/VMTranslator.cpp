@@ -6,6 +6,7 @@
 using namespace std;
 
 int VMTranslator::labelCount = 0;
+string VMTranslator::moduleName = "defMod"; // default module name
 
 // a single point of reference for decoding register reference
 string VMTranslator::regDecode(string seg, int offset) {
@@ -70,7 +71,7 @@ string VMTranslator::fnLabelEncode(string modName, string name) {
  * VMTranslator constructor
  */
 VMTranslator::VMTranslator() {
-  moduleName = "defMod";
+
 }
 
 VMTranslator::VMTranslator(string moduleName_in) {
@@ -388,7 +389,7 @@ string VMTranslator::vm_call(string function_name, int n_args){
 
 	out.comment("call "+function_name);
 	out.comment("store callers pointers");
-	// R13 = SP
+	// R13 = SP, return location
 	out.ins(	"@SP"	 );
 	out.ins(	"D=M"	 );
 	out.ins(	"@R13" );
@@ -454,7 +455,7 @@ string VMTranslator::vm_call(string function_name, int n_args){
 	out.ins(	"M=D" 		);
 	out.ins(	"@"+fnLabelEncode(function_name) 	);
 	out.ins(	"0;JMP"		);
-	out.ins(	"(RET."+lID	);
+	out.ins(	"(RET."+lID+")"	);
 
 	return out.str();
 }
