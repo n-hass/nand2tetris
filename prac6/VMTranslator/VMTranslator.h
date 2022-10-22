@@ -38,6 +38,7 @@ class VMTranslator {
 
         static string regDecode(string segment, int offset);
         static bool validSegment(string segment);
+        static int labelCount;
         
 };
 

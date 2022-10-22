@@ -1,9 +1,12 @@
 #include <string>
 
 #include "VMTranslator.h"
-#include "Lines.hpp"
+#include "Filestr.hpp"
 
 using namespace std;
+
+int VMTranslator::labelCount = 0;
+
 
 // a single point of reference for decoding register reference
 string VMTranslator::regDecode(string seg, int offset) {
@@ -69,7 +72,7 @@ string VMTranslator::vm_push(string segment, int offset) {
 	if (validSegment(segment) == false)
 		return "";
 
-	File out;
+	Filestr out;
 	string reg = regDecode(segment, offset);
 	string ofs = to_string(offset);
 
@@ -107,7 +110,7 @@ string VMTranslator::vm_pop(string segment, int offset) {
 	if (validSegment(segment) == false)
 		return "";
 	
-	File out;
+	Filestr out;
 	string reg = regDecode(segment, offset);
 	string ofs = to_string(offset);
 
@@ -150,76 +153,189 @@ string VMTranslator::vm_pop(string segment, int offset) {
 }
 
 /** Generate Hack Assembly code for a VM add operation */
-string VMTranslator::vm_add(){
-    return "";
+string VMTranslator::vm_add() {
+	Filestr out;
+
+	out.ins("@SP","add");
+	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
+	out.ins(  "D=M"     );
+	out.ins(  "A=A-1"   );
+
+	out.ins(  "M=M+D"   );
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM sub operation */
-string VMTranslator::vm_sub(){
-    return "";
+string VMTranslator::vm_sub() {
+	Filestr out;
+
+	out.ins("@SP","sub");
+	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
+	out.ins(  "D=M"     );
+	out.ins(  "A=A-1"   );
+
+	out.ins(  "M=M-D"   );
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM neg operation */
-string VMTranslator::vm_neg(){
-    return "";
+string VMTranslator::vm_neg() {
+  Filestr out;
+
+	out.ins("@SP","neg");
+	out.ins(  "A=M-1"  );
+
+	out.ins(  "M=-M"   );
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM eq operation */
-string VMTranslator::vm_eq(){
-    return "";
+string VMTranslator::vm_eq() {
+	Filestr out;
+
+	out.ins("@SP","eq");
+	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
+	out.ins(  "D=M"     );
+	out.ins(  "A=A-1"   );
+
+	out.ins(	"D=M-D"		);
+	out.ins(	"@FALSE_"+to_string(labelCount)		);
+	out.ins(	"D;JNE"		);
+	out.ins(	"@SP"			);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=-1"		);
+	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"0;JMP"		);
+	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=0"			);
+	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+
+	labelCount++;
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM gt operation */
 string VMTranslator::vm_gt(){
-    return "";
+	Filestr out;
+
+	out.ins("@SP","gt");
+	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
+	out.ins(  "D=M"     );
+	out.ins(  "A=A-1"   );
+
+	out.ins(	"D=M-D"		);
+	out.ins(	"@FALSE_"+to_string(labelCount)		);
+	out.ins(	"D;JLE"		);
+	out.ins(	"@SP"			);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=-1"		);
+	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"0;JMP"		);
+	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=0"			);
+	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+
+	labelCount++;
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM lt operation */
 string VMTranslator::vm_lt(){
-    return "";
+	Filestr out;
+
+	out.ins("@SP","lt");
+	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
+	out.ins(  "D=M"     );
+	out.ins(  "A=A-1"   );
+
+	out.ins(	"D=M-D"		);
+	out.ins(	"@FALSE_"+to_string(labelCount)		);
+	out.ins(	"D;JGT"		);
+	out.ins(	"@SP"			);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=-1"		);
+	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"0;JMP"		);
+	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"A=M-1"		);
+	out.ins(	"M=0"			);
+	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+
+	labelCount++;
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM and operation */
 string VMTranslator::vm_and(){
-    return "";
+	Filestr out;
+
+	out.ins(	"@SP"			);
+	out.ins(	"AM=M-1"	);
+	out.ins(	"D=M"			);
+	out.ins(	"A=A-1"		);
+	out.ins(	"M=M&D"		);
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM or operation */
 string VMTranslator::vm_or(){
-    return "";
+	Filestr out;
+	
+	out.ins(	"@SP"			);
+	out.ins(	"AM=M-1"	);
+	out.ins(	"D=M"			);
+	out.ins(	"A=A-1"		);
+	out.ins(	"M=M|D"		);
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM not operation */
 string VMTranslator::vm_not(){
-    return "";
+	Filestr out;
+	
+	out.ins(	"@SP"			);
+	out.ins(	"A=M-1"	  );
+	out.ins(	"M=!M"		);
+
+	return out.str();
 }
 
 /** Generate Hack Assembly code for a VM label operation */
 string VMTranslator::vm_label(string label){
-    return "";
+	return "";
 }
 
 /** Generate Hack Assembly code for a VM goto operation */
 string VMTranslator::vm_goto(string label){
-    return "";
+	return "";
 }
 
 /** Generate Hack Assembly code for a VM if-goto operation */
 string VMTranslator::vm_if(string label){
-    return "";
+	return "";
 }
 
 /** Generate Hack Assembly code for a VM function operation */
 string VMTranslator::vm_function(string function_name, int n_vars){
-    return "";
+	return "";
 }
 
 /** Generate Hack Assembly code for a VM call operation */
 string VMTranslator::vm_call(string function_name, int n_args){
-    return "";
+	return "";
 }
 
 /** Generate Hack Assembly code for a VM return operation */
 string VMTranslator::vm_return(){
-    return "";
+	return "";
 }

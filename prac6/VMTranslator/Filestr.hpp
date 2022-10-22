@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-struct File {
+struct Filestr {
   std::string __a;
 
   inline void ins(const std::string &in) {
@@ -14,7 +14,7 @@ struct File {
 
   inline std::string str() {
     if (__a.back() == '\n') {
-      __a.pop_back();
+      __a.pop_back(); // consume a trailing newline, if it exists
     }
     return __a;
   }

@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++11 -g -Wall
 SRC = VMTranslator.cpp #implementation files for classes here
 OBJ = $(SRC:.cpp=.o)
 
-$(OBJ): Lines.hpp
+$(OBJ): Filestr.hpp
 
 # ### build targets ###
 all: main test
@@ -21,3 +21,4 @@ clean:
 	rm -f main
 	rm -rf *.dSYM
 	rm -f *.o
+	rm tests/*.asm
