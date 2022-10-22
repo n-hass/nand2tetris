@@ -195,6 +195,7 @@ string VMTranslator::vm_neg() {
 /** Generate Hack Assembly code for a VM eq operation */
 string VMTranslator::vm_eq() {
 	Filestr out;
+	string lc = to_string(labelCount);
 
 	out.ins("@SP","eq");
 	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
@@ -202,17 +203,18 @@ string VMTranslator::vm_eq() {
 	out.ins(  "A=A-1"   );
 
 	out.ins(	"D=M-D"		);
-	out.ins(	"@FALSE_"+to_string(labelCount)		);
-	out.ins(	"D;JNE"		);
+	out.ins(	"@EQ.true_"+lc		);
+	out.ins(	"D;JEQ"		);
 	out.ins(	"@SP"			);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=-1"		);
-	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"M=0"		);
+	out.ins(	"@EQ.skip_"+lc		);
 	out.ins(	"0;JMP"		);
-	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"(EQ.true_"+lc+")"	);
+	out.ins(	"@SP"		);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=0"			);
-	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+	out.ins(	"M=-1"			);
+	out.ins(	"(EQ.skip_"+lc+")"	);
 
 	labelCount++;
 
@@ -222,6 +224,7 @@ string VMTranslator::vm_eq() {
 /** Generate Hack Assembly code for a VM gt operation */
 string VMTranslator::vm_gt(){
 	Filestr out;
+	string lc = to_string(labelCount);
 
 	out.ins("@SP","gt");
 	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
@@ -229,17 +232,18 @@ string VMTranslator::vm_gt(){
 	out.ins(  "A=A-1"   );
 
 	out.ins(	"D=M-D"		);
-	out.ins(	"@FALSE_"+to_string(labelCount)		);
-	out.ins(	"D;JLE"		);
+	out.ins(	"@GT.true_"+lc		);
+	out.ins(	"D;JGT"		);
 	out.ins(	"@SP"			);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=-1"		);
-	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"M=0"		);
+	out.ins(	"@GT.skip_"+lc		);
 	out.ins(	"0;JMP"		);
-	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"(GT.true_"+lc+")"	);
+	out.ins(	"@SP"		);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=0"			);
-	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+	out.ins(	"M=-1"			);
+	out.ins(	"(GT.skip_"+lc+")"	);
 
 	labelCount++;
 
@@ -249,6 +253,7 @@ string VMTranslator::vm_gt(){
 /** Generate Hack Assembly code for a VM lt operation */
 string VMTranslator::vm_lt(){
 	Filestr out;
+	string lc = to_string(labelCount);
 
 	out.ins("@SP","lt");
 	out.ins(  "AM=M-1"  ); // AM dest as stack is 1 entry smaller after op complete
@@ -256,17 +261,18 @@ string VMTranslator::vm_lt(){
 	out.ins(  "A=A-1"   );
 
 	out.ins(	"D=M-D"		);
-	out.ins(	"@FALSE_"+to_string(labelCount)		);
-	out.ins(	"D;JGT"		);
+	out.ins(	"@LT.true_"+lc		);
+	out.ins(	"D;JLT"		);
 	out.ins(	"@SP"			);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=-1"		);
-	out.ins(	"@SKIP_"+to_string(labelCount)		);
+	out.ins(	"M=0"		);
+	out.ins(	"@LT.skip_"+lc		);
 	out.ins(	"0;JMP"		);
-	out.ins(	"(FALSE_"+to_string(labelCount)+")"	);
+	out.ins(	"(LT.true_"+lc+")"	);
+	out.ins(	"@SP"		);
 	out.ins(	"A=M-1"		);
-	out.ins(	"M=0"			);
-	out.ins(	"(SKIP_"+to_string(labelCount)+")"	);
+	out.ins(	"M=-1"			);
+	out.ins(	"(LT.skip_"+lc+")"	);
 
 	labelCount++;
 

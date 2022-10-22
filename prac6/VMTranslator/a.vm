@@ -1,1 +1,3 @@
+push static 1
 push local 1
+lt
