@@ -1,6 +1,4 @@
-// Sample Test file for AddSub.vm
-// Follows the Test Scripting Language format described in 
-// Appendix B of the book "The Elements of Computing Systems"
+// test file for the vm to be translated by the main program"
 
 load a.vm,
 
