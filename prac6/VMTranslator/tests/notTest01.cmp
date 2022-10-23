@@ -1,0 +1,13 @@
+@ARG	// push argument 3
+D=M
+@3
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// not
+A=M-1
+M=!M

@@ -1,0 +1,16 @@
+(FUNC.defMod.tree)	// function declaration: tree 4
+@SP	
+A=M	
+// clearing the stack for function: tree
+M=0
+A=A+1
+M=0
+A=A+1
+M=0
+A=A+1
+M=0
+A=A+1
+// finished clearing
+D=A
+@SP
+M=D

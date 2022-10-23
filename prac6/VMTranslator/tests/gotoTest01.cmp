@@ -1,0 +1,25 @@
+@3	// push constant 3
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@foo	// jump to foo
+0;JMP
+(bar)	// new label: bar
+@4	// push constant 4
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+(foo)	// new label: foo
+@6	// push constant 6
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1

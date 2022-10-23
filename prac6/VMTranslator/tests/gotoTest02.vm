@@ -1,0 +1,10 @@
+push static 0
+label START
+push argument 1
+add
+goto 1test_lab
+
+
+label 1test_lab
+push constant 3
+label START

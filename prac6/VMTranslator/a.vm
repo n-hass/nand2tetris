@@ -1,0 +1,6 @@
+push constant 2
+push constant 2
+eq
+
+label bar
+push 

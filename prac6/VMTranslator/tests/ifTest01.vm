@@ -1,0 +1,16 @@
+push constant 1
+label START
+push argument 0
+goto CONDITION
+
+label CONDITION
+push constant 1
+add
+push temp 1
+push temp 2
+lt
+if-goto START
+goto END
+
+label END
+goto END

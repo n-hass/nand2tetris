@@ -1,0 +1,34 @@
+@16	// push static 0
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+(START)	// new label: START
+@ARG	// push argument 1
+D=M
+@1
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// add
+AM=M-1
+D=M
+A=A-1
+M=M+D
+@1test_lab	// jump to 1test_lab
+0;JMP
+(1test_lab)	// new label: 1test_lab
+@3	// push constant 3
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+(START)	// new label: START

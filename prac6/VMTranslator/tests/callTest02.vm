@@ -1,0 +1,8 @@
+push constant 1
+call Hartley 1
+
+function Hartley 2
+push argument 0
+push argument 1
+sub
+return

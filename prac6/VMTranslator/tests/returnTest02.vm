@@ -1,0 +1,33 @@
+push static 0
+call doesXeq12 1
+if-goto X_WAS_12
+goto FALSE
+
+label X_WAS_12
+push constant 12
+pop static 0
+
+label FALSE
+push constant 1
+neg
+pop static 0
+goto END
+
+label END
+goto END
+
+function doesXeq12 1
+push constant 12
+push argument 0
+eq
+if-goto TRUE
+goto FALSE
+
+label TRUE
+push constant 1
+neg
+return
+
+label FALSE
+push constant 0
+return

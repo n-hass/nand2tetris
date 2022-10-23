@@ -1,2 +1,4 @@
+push this 1
 pop pointer 6
+push constant 3
 pop temp 7

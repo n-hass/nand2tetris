@@ -1,0 +1,13 @@
+push temp 0
+push static 2
+call abc 1
+add
+pop static 0
+
+function abc 1
+push argument 0
+push constant 3
+add
+push static 1
+add
+return

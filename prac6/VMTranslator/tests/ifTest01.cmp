@@ -1,0 +1,74 @@
+@1	// push constant 1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+(START)	// new label: START
+@ARG	// push argument 0
+D=M
+@0
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@CONDITION	// jump to CONDITION
+0;JMP
+(CONDITION)	// new label: CONDITION
+@1	// push constant 1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// add
+AM=M-1
+D=M
+A=A-1
+M=M+D
+@R6	// push temp 1
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@R7	// push temp 2
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// lt
+AM=M-1
+D=M
+A=A-1
+D=M-D
+@LT.true_1
+D;JLT
+@SP
+A=M-1
+M=0
+@LT.skip_1
+0;JMP
+(LT.true_1)
+@SP
+A=M-1
+M=-1
+(LT.skip_1)
+@SP	// if-goto START
+AM=M-1
+D=M
+@START
+D;JNE
+@END	// jump to END
+0;JMP
+(END)	// new label: END
+@END	// jump to END
+0;JMP

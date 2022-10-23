@@ -44,19 +44,19 @@ string VMTranslator::newLabelId() {
 }
 
 bool VMTranslator::validSegment(string segment) {
-    if (
-        segment == "constant" || 
-        segment == "static" || 
-        segment == "local" || 
-        segment == "this" ||
-        segment == "that" ||
-        segment == "temp" ||
-        segment == "pointer" ||
-        segment == "argument" )
-    {
-        return true;
-    }
-    return false;
+	if (
+		segment == "constant" || 
+		segment == "static" || 
+		segment == "local" || 
+		segment == "this" ||
+		segment == "that" ||
+		segment == "temp" ||
+		segment == "pointer" ||
+		segment == "argument" )
+	{
+		return true;
+	}
+	return false;
 }
 
 string VMTranslator::fnLabelEncode(string name) {
@@ -295,7 +295,7 @@ string VMTranslator::vm_lt(){
 string VMTranslator::vm_and(){
 	Filestr out;
 
-	out.ins(	"@SP"			);
+	out.ins(	"@SP", "and"			);
 	out.ins(	"AM=M-1"	);
 	out.ins(	"D=M"			);
 	out.ins(	"A=A-1"		);
@@ -308,7 +308,7 @@ string VMTranslator::vm_and(){
 string VMTranslator::vm_or(){
 	Filestr out;
 	
-	out.ins(	"@SP"			);
+	out.ins(	"@SP", "or"			);
 	out.ins(	"AM=M-1"	);
 	out.ins(	"D=M"			);
 	out.ins(	"A=A-1"		);
@@ -321,7 +321,7 @@ string VMTranslator::vm_or(){
 string VMTranslator::vm_not(){
 	Filestr out;
 	
-	out.ins(	"@SP"			);
+	out.ins(	"@SP","not"			);
 	out.ins(	"A=M-1"	  );
 	out.ins(	"M=!M"		);
 
@@ -374,6 +374,7 @@ string VMTranslator::vm_function(string function_name, int n_vars){
 		out.ins(	"M=0"			);
 		out.ins(	"A=A+1"		);
 	}
+	out.comment("finished clearing");
 
 	out.ins(	"D=A"		);
 	out.ins(	"@SP"		);

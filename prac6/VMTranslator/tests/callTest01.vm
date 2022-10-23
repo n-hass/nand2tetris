@@ -1,0 +1,10 @@
+push constant 1
+call Bar.bar 1
+push constant 3
+add
+
+function Bar.bar 1
+push argument 0
+push constant 2
+add
+return

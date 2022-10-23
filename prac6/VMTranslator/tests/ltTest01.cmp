@@ -1,31 +1,31 @@
-@2	// push constant 2
+@8	// push constant 8
 D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1
-@2	// push constant 2
+@1	// push constant 1
 D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1
-@SP	// eq
+@SP	// lt
 AM=M-1
 D=M
 A=A-1
 D=M-D
-@EQ.true_1
-D;JEQ
+@LT.true_1
+D;JLT
 @SP
 A=M-1
 M=0
-@EQ.skip_1
+@LT.skip_1
 0;JMP
-(EQ.true_1)
+(LT.true_1)
 @SP
 A=M-1
 M=-1
-(EQ.skip_1)
+(LT.skip_1)

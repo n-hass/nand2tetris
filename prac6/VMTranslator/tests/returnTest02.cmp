@@ -1,0 +1,263 @@
+@16	// push static 0
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// call doesXeq12
+// store callers pointers
+@SP
+D=M
+@R13
+M=D
+@RET.1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@LCL	// store LCL on stack
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@ARG	// store ARG on stack
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THIS	// store THIS on stack
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THAT	// store THAT on stack
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// setup ARG and LCL for callee
+@R13	// update ARG
+D=M
+@1
+D=D-A
+@ARG
+M=D
+@SP	// update LCL
+D=M
+@LCL
+M=D
+@FUNC.defMod.doesXeq12
+0;JMP
+(RET.1)
+@SP	// if-goto X_WAS_12
+AM=M-1
+D=M
+@X_WAS_12
+D;JNE
+@FALSE	// jump to FALSE
+0;JMP
+(X_WAS_12)	// new label: X_WAS_12
+@12	// push constant 12
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@16	// pop static 0
+D=A
+@R13
+M=D
+@SP
+AM=M-1
+D=M
+@R13
+A=M
+M=D
+(FALSE)	// new label: FALSE
+@1	// push constant 1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// neg
+A=M-1
+M=-M
+@16	// pop static 0
+D=A
+@R13
+M=D
+@SP
+AM=M-1
+D=M
+@R13
+A=M
+M=D
+@END	// jump to END
+0;JMP
+(END)	// new label: END
+@END	// jump to END
+0;JMP
+(FUNC.defMod.doesXeq12)	// function declaration: doesXeq12 1
+@SP	
+A=M	
+// clearing the stack for function: doesXeq12
+M=0
+A=A+1
+// finished clearing
+D=A
+@SP
+M=D
+@12	// push constant 12
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@ARG	// push argument 0
+D=M
+@0
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// eq
+AM=M-1
+D=M
+A=A-1
+D=M-D
+@EQ.true_3
+D;JEQ
+@SP
+A=M-1
+M=0
+@EQ.skip_3
+0;JMP
+(EQ.true_3)
+@SP
+A=M-1
+M=-1
+(EQ.skip_3)
+@SP	// if-goto TRUE
+AM=M-1
+D=M
+@TRUE
+D;JNE
+@FALSE	// jump to FALSE
+0;JMP
+(TRUE)	// new label: TRUE
+@1	// push constant 1
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// neg
+A=M-1
+M=-M
+// returning to caller
+@LCL
+D=M
+@5
+A=D-A
+D=M
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@ARG
+A=M
+M=D
+D=A+1
+@SP
+M=D
+@LCL
+AM=M-1
+D=M
+@THAT
+M=D
+@LCL
+AM=M-1
+D=M
+@THIS
+M=D
+@LCL
+AM=M-1
+D=M
+@ARG
+M=D
+@LCL
+A=M-1
+D=M
+@LCL
+M=D
+@R13	// jump back to caller
+A=M
+0;JMP
+(FALSE)	// new label: FALSE
+@0	// push constant 0
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+// returning to caller
+@LCL
+D=M
+@5
+A=D-A
+D=M
+@R13
+M=D
+@SP
+A=M-1
+D=M
+@ARG
+A=M
+M=D
+D=A+1
+@SP
+M=D
+@LCL
+AM=M-1
+D=M
+@THAT
+M=D
+@LCL
+AM=M-1
+D=M
+@THIS
+M=D
+@LCL
+AM=M-1
+D=M
+@ARG
+M=D
+@LCL
+A=M-1
+D=M
+@LCL
+M=D
+@R13	// jump back to caller
+A=M
+0;JMP

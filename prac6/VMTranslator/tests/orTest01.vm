@@ -1,0 +1,3 @@
+push local 2
+push argument 0
+or

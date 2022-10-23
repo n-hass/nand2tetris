@@ -16,3 +16,5 @@
 # ignore script outputs
 **/*.out
 "csadelaide-nand2tetris/tools/bin/Hardware Simulator.dat"
+
+prac6/VMTranslator/*.tst

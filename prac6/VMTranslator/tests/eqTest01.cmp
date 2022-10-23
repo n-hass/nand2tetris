@@ -1,11 +1,11 @@
-@2	// push constant 2
+@12	// push constant 12
 D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1
-@2	// push constant 2
+@13	// push constant 13
 D=A
 @SP
 A=M

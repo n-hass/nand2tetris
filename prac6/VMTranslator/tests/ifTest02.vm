@@ -1,0 +1,4 @@
+label START
+push constant 1
+neg
+if-goto START

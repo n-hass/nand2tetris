@@ -1,0 +1,8 @@
+(FUNC.defMod.bar)	// function declaration: bar 0
+@SP	
+A=M	
+// clearing the stack for function: bar
+// finished clearing
+D=A
+@SP
+M=D

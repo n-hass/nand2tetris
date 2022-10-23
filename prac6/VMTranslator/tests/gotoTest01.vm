@@ -1,0 +1,8 @@
+push constant 3
+goto foo
+
+label bar
+push constant 4
+
+label foo
+push constant 6

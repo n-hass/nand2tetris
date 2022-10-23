@@ -1,3 +1,13 @@
+@THIS	// push this 1
+D=M
+@1
+A=D+A
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
 @R9	// pop pointer 6
 D=A
 @R13
@@ -8,6 +18,13 @@ D=M
 @R13
 A=M
 M=D
+@3	// push constant 3
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
 @R12	// pop temp 7
 D=A
 @R13

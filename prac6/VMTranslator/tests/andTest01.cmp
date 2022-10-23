@@ -1,0 +1,19 @@
+@5	// push constant 5
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@19	// push static 3
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@SP	// and
+AM=M-1
+D=M
+A=A-1
+M=M&D

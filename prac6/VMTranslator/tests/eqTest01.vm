@@ -1,0 +1,3 @@
+push constant 12
+push constant 13
+eq
