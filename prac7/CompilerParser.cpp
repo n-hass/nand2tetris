@@ -34,12 +34,13 @@ CompilerParser::CompilerParser(std::vector<Token*> tokens) {
  */
 ParseTree* CompilerParser::compileProgram() {
     // the top root of a Jack program must be a class - everything is in a class
-    if (_tks.front()->getType().find("class") != string::npos ) {
-        if ( str_contains(_tks[1]->getType(),"Main") )
+    if (str_contains(_tks[0]->getValue(),"class") ) {
+        if ( str_contains(_tks[1]->getValue(),"Main") )
         return compileClass();
     } else {
         throw ParseException();
     }
+    return NULL;
 }
 
 /**
