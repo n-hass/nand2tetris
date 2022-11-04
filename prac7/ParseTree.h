@@ -11,7 +11,7 @@ class ParseTree {
         std::vector<ParseTree*> children;
 
     public:
-        ParseTree(std::string type, std::string value);
+        ParseTree(std::string type, std::string value); // only leaf nodes should have a value
 
         void addChild(ParseTree* child);
 

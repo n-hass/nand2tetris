@@ -36,6 +36,26 @@ public:
 
 private:
 	std::vector<Token*> _tks;
+
+	ParseTree *validateClass(ParseTree*);
+  ParseTree *validateClassVarDec(ParseTree*);
+  ParseTree *validateSubroutine(ParseTree*);
+  ParseTree *validateParameterList(ParseTree*);
+  ParseTree *validateSubroutineBody(ParseTree*);
+  ParseTree *validatecompileVarDec(ParseTree*);
+
+  ParseTree *validateStatements(ParseTree*);
+  ParseTree *validateLet(ParseTree*);
+  ParseTree *validateIf(ParseTree*);
+  ParseTree *validateWhile(ParseTree*);
+  ParseTree *validateDo(ParseTree*);
+  ParseTree *validateReturn(ParseTree*);
+
+  ParseTree *validateExpression(ParseTree*);
+  ParseTree *validateTerm(ParseTree*);
+  ParseTree *validateExpressionList(ParseTree*);
+
+	void rmtk();
 };
 
 class ParseException : public std::exception {
