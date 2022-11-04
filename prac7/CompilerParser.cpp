@@ -1,18 +1,33 @@
 #include "CompilerParser.h"
+#include "ParseTree.h"
+#include <string>
 
+using namespace std;
+
+ParseTree* CompilerParser::process_token(Token* t) {
+    
+}
 
 /**
  * Constructor for the CompilerParser
  * @param tokens A linked list of tokens to be parsed
  */
 CompilerParser::CompilerParser(std::vector<Token*> tokens) {
+
+    this->_tks = tokens;
+
 }
 
 /**
  * Generates a parse tree for a single program
  */
 ParseTree* CompilerParser::compileProgram() {
-    return NULL;
+    // the top root of a Jack program must be a class - everything is in a class
+    if (_tks.front()->getType().find("class") != string::npos ){
+        return compileClass();
+    } else {
+        throw ParseException();
+    }
 }
 
 /**
@@ -103,6 +118,8 @@ ParseTree* CompilerParser::compileReturn() {
  * Generates a parse tree for an expression
  */
 ParseTree* CompilerParser::compileExpression() {
+
+
     return NULL;
 }
 
