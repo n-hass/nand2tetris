@@ -4,6 +4,17 @@
 
 using namespace std;
 
+bool str_contains(const string& a, const char& b) {
+	if (a.find(b) == string::npos)
+		return false;
+	return true;
+}
+bool str_contains(const string& a, const string& b) {
+	if (a.find(b) == string::npos)
+		return false;
+	return true;
+}
+
 ParseTree* CompilerParser::process_token(Token* t) {
     
 }
@@ -23,7 +34,8 @@ CompilerParser::CompilerParser(std::vector<Token*> tokens) {
  */
 ParseTree* CompilerParser::compileProgram() {
     // the top root of a Jack program must be a class - everything is in a class
-    if (_tks.front()->getType().find("class") != string::npos ){
+    if (_tks.front()->getType().find("class") != string::npos ) {
+        if ( str_contains(_tks[1]->getType(),"Main") )
         return compileClass();
     } else {
         throw ParseException();
@@ -34,7 +46,7 @@ ParseTree* CompilerParser::compileProgram() {
  * Generates a parse tree for a single class
  */
 ParseTree* CompilerParser::compileClass() {
-    return NULL;
+    
 }
 
 /**
