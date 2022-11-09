@@ -161,7 +161,7 @@ ParseTree *CompilerParser::compileClass() {
 			tree->addChild(compileSubroutine());
 		}
 		else tree->addChild(tlist.process_token());
-	} while ( is_end( tree->getChildren().back() ) == false ); // test if the token just added is the end of the 
+	} while ( is_end( tree->getChildren()[tree->getChildren().size()-1] ) == false ); // test if the token just added is the end of the 
 
   if (validateClass(tree) == false){
 		throw ParseException();
