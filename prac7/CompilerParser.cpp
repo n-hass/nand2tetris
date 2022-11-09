@@ -1,7 +1,11 @@
 #include "CompilerParser.h"
 #include "ParseTree.h"
+#include "Token.h"
+#include <cstddef>
 #include <cstring>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -16,9 +20,76 @@ bool str_contains(const string &a, const string &b) {
   return true;
 }
 
-ParseTree *CompilerParser::process_token(Token *t) {
+TokenList::TokenList() {}
 
+TokenList::TokenList(std::vector<Token*> tks) {
+	this->_tks = std::list<Token*> (tks.begin(), tks.end()); // capture the tokens on construction
+}
+
+string TokenList::peek_type(int i) {
+	std::list<Token*>::iterator it;
+	it = _tks.begin();
+	advance(it,i);
 	
+	return (*it)->getType();
+}
+string TokenList::peek_val(int i) {
+	std::list<Token*>::iterator it;
+	it = _tks.begin();
+	advance(it,i);
+
+	return (*it)->getValue();
+}
+Token* TokenList::peek(){
+	return _tks.front();
+}
+
+// consumes a token from the list
+Token* TokenList::process_token() {
+
+	Token* t = _tks.front();
+
+	if (t->getType().compare("keyword") == 0) {
+		if (gdef::keywords.find(t->getValue()) == gdef::keywords.end())
+			throw ParseException();
+		
+	} else if (t->getType().compare("symbol") == 0) {
+		if (gdef::symbols.find(t->getValue()) == gdef::keywords.end())
+			throw ParseException();
+		
+	} else if (t->getType().compare("integerConstant") == 0) {
+		int x = stoi(t->getType());
+		if ( x < 0 || x > 32767)
+			throw ParseException();
+
+	} else if (t->getType().compare("stringConstant") == 0) {
+		if (t->getValue().front() != '\"' || t->getValue().back() != '\"')
+			throw ParseException();
+		
+		string v = t->getValue().substr(1,t->getValue().size()-2);
+		if (v.compare("\"") == 0 || v.compare("\n") == 0)
+			throw ParseException();
+		
+
+	} else if (t->getType().compare("identifier") == 0) {
+
+		// checks if a string consists of only digits, upper/lower case letters and underscore
+		auto validstring = [](const string& a) {
+			if(a.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") == string::npos)
+				return true;
+			return false;
+		};
+
+		if (t->getValue().front() >= '0' && t->getValue().front() <= '9') // if front character is a number
+			throw ParseException();
+		
+		if (validstring(t->getValue()) == false)
+			throw ParseException();
+
+	}
+	_tks.pop_front();
+
+	return t;
 }
 
 /**
@@ -26,8 +97,7 @@ ParseTree *CompilerParser::process_token(Token *t) {
  * @param tokens A linked list of tokens to be parsed
  */
 CompilerParser::CompilerParser(std::vector<Token *> tokens) {
-
-  this->_tks = tokens;
+  tlist = TokenList(tokens);
 }
 
 /**
@@ -35,22 +105,21 @@ CompilerParser::CompilerParser(std::vector<Token *> tokens) {
  */
 ParseTree *CompilerParser::compileProgram() {
   // the top root of a Jack program must be a class - everything is in a class
-  if ( _tks[0]->getValue().compare("class") == 0) { // validation
-    if (_tks[1]->getValue().compare("Main") == 0)
+  if ( tlist.peek_val(0).compare("class") == 0) { // validation
+    if (tlist.peek_val(1).compare("Main") == 0)
       return compileClass();
   } else {
     throw ParseException();
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
  * Generates a parse tree for a single class
  */
 ParseTree *CompilerParser::compileClass() {
-
-	// lambda for testing if its a classVarDec
-	auto var_test = [](ParseTree* a) {
+	// for testing if token is a classVarDec
+	auto is_vardec = [](ParseTree* a) {
 		if (a->getType().compare("keyword") == 0){
 			if (a->getValue().compare("static"))
 				return true;
@@ -60,8 +129,8 @@ ParseTree *CompilerParser::compileClass() {
 		return false;
 	};
 	
-	// lambda for testing subroutine
-	auto subrt_test = [](ParseTree* a) {
+	// for testing if token is subroutine
+	auto is_subrt = [](ParseTree* a) {
 		if (a->getType().compare("keyword") == 0){
 			if (a->getValue().compare("function"))
 				return true;
@@ -71,38 +140,75 @@ ParseTree *CompilerParser::compileClass() {
 		return false;
 	};
 
-  ParseTree *cl = new ParseTree("class", "");
+	auto is_end = [](ParseTree* a) {
+		if(a->getType() == "symbol")
+			if (a->getValue() == "}")
+				return true;
+		return false;
+	};
 
-  if (_tks[0]->getValue().compare("class") == 0) {
-    _tks.erase(_tks.begin());
-    if (_tks[0]->getType().compare("identifier") == 0) {
-      _tks.erase(_tks.begin());
-
-			if (_tks[0]->getValue().compare("{") == 0) {
-				_tks.erase(_tks.begin());
-			} else throw ParseException();
-			
-    } else throw ParseException();
-
-
-  } else throw ParseException();
-
-	// int blocks = 1; // code blocks nested within the class
-	while ( _tks[0]->getValue().compare("}") != 0) { // while the current token is not 
-		if (var_test(_tks[0])) {
-			_tks[0]->addChild( compileClassVarDec() );
-		}
-		if (subrt_test(_tks[0])) {
-			_tks[0]->addChild( compileSubroutine() );
-		}
-	}
+  ParseTree *tree = new ParseTree("class", "");
+	tree->addChild(tlist.process_token()); // token: keyword class
+	tree->addChild(tlist.process_token()); // token: identifier
+	tree->addChild(tlist.process_token()); // token: symbol {
 	
-	// remove the closing '}' from the token list
-	_tks.erase(_tks.begin());
+	do {
+		Token* x = tlist.peek();
+		if (is_vardec(x)) {
+			tree->addChild(compileClassVarDec());
+		}
+		else if (is_subrt(x)) {
+			tree->addChild(compileSubroutine());
+		}
+		else tree->addChild(tlist.process_token());
+	} while ( is_end( tree->getChildren().back() ) == false ); // test if the token just added is the end of the 
 
-  validateClass(cl);
+  if (validateClass(tree) == false){
+		throw ParseException();
+	}
+  return tree;
+}
 
-  return cl;
+bool CompilerParser::validateClass(ParseTree* x) {
+	vector<ParseTree *> c = x->getChildren();
+
+	// the class structure ParseTree
+	if (x->getType() != "class" || x->getValue() != "") 
+		return false;
+	
+	// the first token, keyword class
+	if (c[0]->getType() != "keyword" || c[0]->getValue() != "class")
+		return false;
+	
+	// an identifier (which has already been validated by process_token)
+	if (c[1]->getType() != "identifier")
+		return false;
+	
+	// the open '{'
+	if (c[2]->getType() != "symbol" || c[2]->getValue() != "{")
+		return false;
+	
+	// class decleration body
+	auto is_end = [](ParseTree* a) {
+		if(a->getType() == "symbol")
+			if (a->getValue() == "}")
+				return true;
+		return false;
+	};
+	int i=3;
+	while ( is_end(c[i]) == false ) {
+		if (c[i]->getType() != "classVarDec") {
+			if (c[i]->getType() != "subroutine")
+				return false;
+		}
+		
+		i++;
+	}
+
+	if (i != c.size()-1 || c[i]->getType() != "symbol" || c[i]->getValue() != "}")
+		return false;
+
+	return true;
 }
 
 /**

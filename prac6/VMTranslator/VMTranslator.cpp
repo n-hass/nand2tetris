@@ -390,7 +390,7 @@ string VMTranslator::vm_call(string function_name, int n_args){
 
 	out.comment("call "+function_name);
 	out.comment("store callers pointers");
-	// R13 = SP, return location
+	// R13 = SP, temporarily store the stack address in R13
 	out.ins(	"@SP"	 );
 	out.ins(	"D=M"	 );
 	out.ins(	"@R13" );

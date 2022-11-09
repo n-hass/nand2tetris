@@ -2,12 +2,29 @@
 #define COMPILERPARSER_H
 
 #include <exception>
-#include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <list>
 
 #include "ParseTree.h"
 #include "Token.h"
+
+// an abstraction interface for managing the tokens. for scaling later
+struct TokenList {
+  public:
+  TokenList();
+  TokenList(std::vector<Token*>);
+
+  Token* process_token(); // used when you want to return the token and consume it
+  Token* peek(); // used when you only want to see the next token, there is no processing or deletion from the list
+  std::string peek_val(int i);
+  std::string peek_type(int i);
+
+
+  private:
+  std::list<Token*> _tks;
+};
 
 class CompilerParser {
 public:
@@ -32,30 +49,28 @@ public:
   ParseTree *compileTerm();
   ParseTree *compileExpressionList();
 
-  ParseTree *process_token(Token*);
-
 private:
-	std::vector<Token*> _tks;
+	bool validateClass(ParseTree*);
+  bool validateClassVarDec(ParseTree*);
+  bool validateSubroutine(ParseTree*);
+  bool validateParameterList(ParseTree*);
+  bool validateSubroutineBody(ParseTree*);
+  bool validatecompileVarDec(ParseTree*);
 
-	ParseTree *validateClass(ParseTree*);
-  ParseTree *validateClassVarDec(ParseTree*);
-  ParseTree *validateSubroutine(ParseTree*);
-  ParseTree *validateParameterList(ParseTree*);
-  ParseTree *validateSubroutineBody(ParseTree*);
-  ParseTree *validatecompileVarDec(ParseTree*);
+  bool validateStatements(ParseTree*);
+  bool validateLet(ParseTree*);
+  bool validateIf(ParseTree*);
+  bool validateWhile(ParseTree*);
+  bool validateDo(ParseTree*);
+  bool validateReturn(ParseTree*);
 
-  ParseTree *validateStatements(ParseTree*);
-  ParseTree *validateLet(ParseTree*);
-  ParseTree *validateIf(ParseTree*);
-  ParseTree *validateWhile(ParseTree*);
-  ParseTree *validateDo(ParseTree*);
-  ParseTree *validateReturn(ParseTree*);
+  bool validateExpression(ParseTree*);
+  bool validateTerm(ParseTree*);
+  bool validateExpressionList(ParseTree*);
 
-  ParseTree *validateExpression(ParseTree*);
-  ParseTree *validateTerm(ParseTree*);
-  ParseTree *validateExpressionList(ParseTree*);
+  
 
-	void rmtk();
+  TokenList tlist;
 };
 
 class ParseException : public std::exception {
@@ -63,7 +78,8 @@ public:
   const char *what();
 };
 
-namespace mappings {
+// grammar definition maps
+namespace gdef {
 	const std::unordered_set<std::string> keywords {
 		"class", "constructor", "function", "method", "field", "static", "var",
 		"int", "char", "boolean", "void", "true", "false", "null", "this",
@@ -75,31 +91,31 @@ namespace mappings {
 		"+", "-", "*", "/",
 		"&", "|", "<", ">", "=", "~"
 	};
+
+  /*
+	  directly maps a keyword token to a ParseTree type (if such a mapping exists)
+  */
+  const std::unordered_map<std::string, std::string> kw_tk {
+    {"class", "class"},
+    {"constructor","subroutine"},
+    {"function","subroutine"},
+    {"method","subroutine"},
+
+    {"field","classVarDec"},
+    {"static", "classVarDec"},
+
+    {"var","varDec"},
+    {"let","varDec"},
+
+    {"let","letStatement"},
+    {"if","ifStatement"},
+    {"while","whileStatement"},
+    {"do","doStatement"},
+    {"return","returnStatement"},
+    
+    {"skip","expression"},
+
+  };
 }
-/*
-	directly maps a token type to a ParseTree type (if such a mapping exists)
-*/
-const std::map<std::string, std::string> token_tksrees {
-  {"class", "class"},
-
-	{"static", "classVarDec"},
-	{"field","classVarDec"},
-
-	{"constructor","subroutine"},
-	{"function","subroutine"},
-	{"method","subroutine"},
-
-	{"var","varDec"},
-	{"let","varDec"},
-
-	{"let","letStatement"},
-	{"if","ifStatement"},
-	{"while","whileStatement"},
-	{"do","doStatement"},
-	{"return","returnStatement"},
-	
-	{"skip","expression"},
-
-};
 
 #endif /*COMPILERPARSER_H*/
