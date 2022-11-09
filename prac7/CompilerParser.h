@@ -68,7 +68,7 @@ private:
   bool validateTerm(ParseTree*);
   bool validateExpressionList(ParseTree*);
 
-  
+
 
   TokenList tlist;
 };
@@ -91,6 +91,10 @@ namespace gdef {
 		"+", "-", "*", "/",
 		"&", "|", "<", ">", "=", "~"
 	};
+
+  const std::unordered_set<std::string> vartypes {
+    "int", "char", "boolean"
+  };
 
   /*
 	  directly maps a keyword token to a ParseTree type (if such a mapping exists)
