@@ -49,6 +49,9 @@ Token* TokenList::process_token() {
 
 	Token* t = _tks.front();
 
+	if (t == nullptr)
+		throw ParseException();
+
 	if (t->getType() == "keyword") {
 		if (gdef::keywords.find(t->getValue()) == gdef::keywords.end())
 			throw ParseException();
@@ -508,7 +511,17 @@ bool CompilerParser::validateVarDec(ParseTree* tree) {
 ParseTree *CompilerParser::compileStatements() {
 	ParseTree *tree = new ParseTree ("statements", "");
 
-	// do stuff and validate
+	// end of statements block = return statement;
+	auto is_end = [](ParseTree* a) {
+		if(a == nullptr) return true;
+		if(a->getType() == "symbol")
+			if (a->getValue() == "}")
+				return true;
+		return false;
+	};
+	ParseTree *x = tlist.peek();
+
+
 
 	return tree;
 }
