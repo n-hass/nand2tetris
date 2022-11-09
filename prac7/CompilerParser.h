@@ -55,7 +55,7 @@ private:
   bool validateSubroutine(ParseTree*);
   bool validateParameterList(ParseTree*);
   bool validateSubroutineBody(ParseTree*);
-  bool validatecompileVarDec(ParseTree*);
+  bool validateVarDec(ParseTree*);
 
   bool validateStatements(ParseTree*);
   bool validateLet(ParseTree*);

@@ -368,6 +368,10 @@ bool CompilerParser::validateParameterList(ParseTree *tree) {
 	
 	vector<ParseTree*> c = tree->getChildren();
 
+	// function is valid if it has no parameters
+	if (c.size() == 0)
+		return true;
+	
 	// parameter list is either of length 2 when one parameter, or when length n, n+1 is divisble by 3
 	if (c.size() < 2 || (c.size() != 2 && (c.size()+1)%3 != 0))
 		return false;
@@ -393,20 +397,121 @@ bool CompilerParser::validateParameterList(ParseTree *tree) {
 ParseTree *CompilerParser::compileSubroutineBody() {
 	ParseTree *tree = new ParseTree("subroutineBody", "");
 
-	// do stuff
+	tree->addChild(tlist.process_token()); // symbol: '{'
+
+	auto is_end = [](ParseTree* a) {
+		if(a == nullptr) return true;
+		if(a->getType() == "symbol")
+			if (a->getValue() == "}")
+				return true;
+		return false;
+	};
+	ParseTree *x = tlist.peek();
+	while(is_end(x) == false) {
+		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
+			tree->addChild(compileVarDec());
+		else
+		 tree->addChild(compileStatements());
+	}
+	tree->addChild(tlist.process_token()); // symbol: '}'
+
+	if (validateSubroutineBody(tree) == false) throw ParseException();
 
 	return tree;
+}
+bool CompilerParser::validateSubroutineBody(ParseTree *tree) {
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c[0]->getType() != "symbol" || c[0]->getValue() != "{")
+		return false;
+	
+	int i=1;
+	while(c[i]->getType() != "symbol" && c[i]->getValue() != "}") {
+		// these should all only be statements and varDecs which, by this time, are already validated
+		if (c[i]->getType() != "varDec" && c[i]->getType() != "statements")
+			return false;
+
+		i++;
+	}
+
+	if (c[i] != c.back())
+		return false;
+
+	return true;
 }
 
 /**
  * Generates a parse tree for a variable declaration
  */
-ParseTree *CompilerParser::compileVarDec() { return NULL; }
+ParseTree *CompilerParser::compileVarDec() {
+	ParseTree *tree = new ParseTree("varDec","");
+
+	tree->addChild(tlist.process_token()); // keyword: var
+	tree->addChild(tlist.process_token()); // keyword: type
+
+	tree->addChild(tlist.process_token()); // the first identifier
+
+	auto is_comma = [](ParseTree* a) {
+		if (a==nullptr) return true; // break the loop
+		if (a->getType() == "symbol"){
+			if (a->getValue() == ",")
+				return true;
+		}
+		return false;
+	};
+	ParseTree *x = tlist.peek();
+	while(is_comma(x)) {
+		tree->addChild(tlist.process_token()); // add the comma
+		tree->addChild(tlist.process_token()); // add the next identifier
+		x = tlist.peek();
+	}
+
+	tree->addChild(tlist.process_token()); // the semicolon
+
+	if (validateVarDec(tree) == false) throw ParseException();
+	
+	return tree; 
+}
+
+bool CompilerParser::validateVarDec(ParseTree* tree) {
+	vector<ParseTree*> c = tree->getChildren();
+	
+	if (tree->getType() != "varDec" || tree->getValue() != "")
+		throw ParseException();
+	
+	if (c[0]->getType() != "keyword" || (c[0]->getValue() != "var"))
+		throw ParseException();
+	
+	if (c[1]->getType() != "keyword" || gdef::vartypes.find(c[1]->getValue()) == gdef::vartypes.end())
+		throw ParseException();
+	
+	// identifier list
+	for (int i=2; i<c.size()-1; i++) {
+		if (i%2 == 0) {
+			if (c[i]->getType() != "identifier")
+				return false;
+		} else {
+			if (c[i]->getType() != "symbol" || c[i]->getValue() != ",")
+				return false;
+		}
+	}
+
+	if (c.back()->getType() != "symbol" || c.back()->getValue() != ";")
+		return false;
+	
+	return true;
+}
 
 /**
  * Generates a parse tree for a series of statements
  */
-ParseTree *CompilerParser::compileStatements() { return NULL; }
+ParseTree *CompilerParser::compileStatements() {
+	ParseTree *tree = new ParseTree ("statements", "");
+
+	// do stuff and validate
+
+	return tree;
+}
 
 /**
  * Generates a parse tree for a let statement

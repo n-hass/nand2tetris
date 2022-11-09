@@ -17,21 +17,31 @@ int main(int argc, char *argv[]) {
     tokens.push_back(new Token("identifier", "Main"));
     tokens.push_back(new Token("symbol", "{"));
 
-    tokens.push_back(new Token("keyword", "field"));
-    tokens.push_back(new Token("keyword", "int"));
-    tokens.push_back(new Token("identifier", "test"));
-    tokens.push_back(new Token("symbol", ";"));
+    // tokens.push_back(new Token("keyword", "field"));
+    // tokens.push_back(new Token("keyword", "int"));
+    // tokens.push_back(new Token("identifier", "test"));
+    // tokens.push_back(new Token("symbol", ";"));
 
-    tokens.push_back(new Token("keyword", "method"));
-    tokens.push_back(new Token("keyword", "int"));
-    tokens.push_back(new Token("identifier", "foo"));
+    // tokens.push_back(new Token("keyword", "method"));
+    // tokens.push_back(new Token("keyword", "int"));
+    // tokens.push_back(new Token("identifier", "foo"));
+    // tokens.push_back(new Token("symbol", "("));
+    // tokens.push_back(new Token("keyword", "int"));
+    // tokens.push_back(new Token("identifier", "x"));
+    // tokens.push_back(new Token("symbol", ","));
+    // tokens.push_back(new Token("keyword", "char"));
+    // tokens.push_back(new Token("identifier", "y"));
+    // tokens.push_back(new Token("symbol", ")"));
+
+    tokens.push_back(new Token("keyword", "function"));
+    tokens.push_back(new Token("keyword", "void"));
+    tokens.push_back(new Token("identifier", "test"));
     tokens.push_back(new Token("symbol", "("));
     tokens.push_back(new Token("keyword", "int"));
     tokens.push_back(new Token("identifier", "x"));
-    tokens.push_back(new Token("symbol", ","));
-    tokens.push_back(new Token("keyword", "char"));
-    tokens.push_back(new Token("identifier", "y"));
     tokens.push_back(new Token("symbol", ")"));
+    tokens.push_back(new Token("symbol", "{"));
+    tokens.push_back(new Token("symbol", "}"));
 
     tokens.push_back(new Token("symbol", "}"));
 
