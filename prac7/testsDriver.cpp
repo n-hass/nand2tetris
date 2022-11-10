@@ -1143,6 +1143,74 @@ bool ifTest4(){
 	return false;
 }
 
+bool ifTest5(){
+
+	std::string s = "if () {";
+	std::cout << "Testing code - Expecting: Error\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 5");
+	totalFailedCases++;
+	return false;
+}
+
+bool ifTest6(){
+
+	std::string s = "if () {} else";
+	std::cout << "Testing code - Expecting: Error\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+	tokens.push_back(new Token("keyword", "else"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 6");
+	totalFailedCases++;
+	return false;
+}
+
 void printResult(bool result, int testNum){
 
 	if(result){
@@ -1224,6 +1292,8 @@ int main(int argc, const char *argv[]){
 	printResult(ifTest2(), i++);
 	printResult(ifTest3(), i++);
 	printResult(ifTest4(), i++);
+	printResult(ifTest5(), i++);
+	printResult(ifTest6(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "TEST SUMMARY\n";

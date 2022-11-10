@@ -608,12 +608,20 @@ ParseTree *CompilerParser::compileIf() {
 		if(a == nullptr) return true;
 		return token_is(a, "symbol", "}");
 	};
+	auto is_statement = [](ParseTree* a) {
+		if (a==nullptr) return false;
+		if (token_is(a, "keyword", "return") || token_is(a, "keyword", "let") || token_is(a, "keyword", "do"))
+			return true;
+		return false;
+	};
+
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
 		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 			tree->addChild(compileVarDec());
-		else
-		 tree->addChild(compileStatements());
+		else if (is_statement(x))
+		  tree->addChild(compileStatements());
+		else throw ParseException();
 		x = tlist.peek();
 	}
 	tree->addChild(tlist.process_token()); // symbol: }
@@ -955,7 +963,8 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
  * Generates a parse tree for an expression
  */
 ParseTree *CompilerParser::compileExpression() {
-	ParseTree *tree = new ParseTree("expression", "skip"); // TEMPORARY SKIP
+	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
+	tree->addChild(new Token("keyword", "skip"));
 	tlist.process_token(); // consume a token
 	return tree;
 }
