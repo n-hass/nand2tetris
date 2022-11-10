@@ -1079,7 +1079,7 @@ bool statementsTest7() {
 
 bool ifTest1(){
 
-	std::string s = "if (skip) {let a = skip; do x(); } else {do y();}";
+	std::string s = "if (skip) {let a = skip; do skip; } else {do skip;}";
 	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
     std::vector<Token*> tokens;
   tokens.push_back(new Token("keyword", "if"));
@@ -1095,14 +1095,14 @@ bool ifTest1(){
 		tokens.push_back(new Token("symbol", ";"));
 
 		tokens.push_back(new Token("keyword", "do"));
-    tokens.push_back(new Token("identifier", "x()")); // check this
+    tokens.push_back(new Token("identifier", "skip")); // check this
 		tokens.push_back(new Token("symbol", ";"));
 
 	tokens.push_back(new Token("symbol", "}"));
 	tokens.push_back(new Token("keyword", "else"));
 	tokens.push_back(new Token("symbol", "{"));
 		tokens.push_back(new Token("keyword", "do"));
-		tokens.push_back(new Token("identifier", "y()")); // check this
+		tokens.push_back(new Token("identifier", "skip")); // check this
 		tokens.push_back(new Token("symbol", ";"));
 	tokens.push_back(new Token("symbol", "}"));
 
@@ -1471,7 +1471,7 @@ bool whileTest3(){
     std::vector<Token*> tokens;
   tokens.push_back(new Token("keyword", "while"));
 	tokens.push_back(new Token("symbol", "("));
-	tokens.push_back(new Token("identfier", "x"));
+	tokens.push_back(new Token("identifier", "x"));
 	tokens.push_back(new Token("symbol", "="));
 	tokens.push_back(new Token("integerConstant", "3"));
 	tokens.push_back(new Token("symbol", ")"));
@@ -1506,7 +1506,7 @@ bool whileTest4(){
     std::vector<Token*> tokens;
   tokens.push_back(new Token("keyword", "while"));
 	tokens.push_back(new Token("symbol", "("));
-	tokens.push_back(new Token("identfier", "x"));
+	tokens.push_back(new Token("identifier", "x"));
 	tokens.push_back(new Token("symbol", "="));
 	tokens.push_back(new Token("integerConstant", "3"));
 	tokens.push_back(new Token("symbol", ")"));
@@ -1514,10 +1514,12 @@ bool whileTest4(){
 	tokens.push_back(new Token("keyword", "let"));
 	tokens.push_back(new Token("identifier", "x"));
 	tokens.push_back(new Token("symbol", "="));
-	tokens.push_back(new Token("expression", "y"));
+	tokens.push_back(new Token("identifier", "y"));
 	tokens.push_back(new Token("symbol", ";"));
 	tokens.push_back(new Token("keyword", "do"));
-	tokens.push_back(new Token("expression", "y()"));
+	tokens.push_back(new Token("identifier", "y"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("symbol", ")"));
 	tokens.push_back(new Token("symbol", ";"));
 	tokens.push_back(new Token("symbol", "}"));
 
@@ -1603,6 +1605,89 @@ bool expressionTest1() {
 	try {
 
 		ParseTree* tree = parser.compileExpression();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
+bool expressionTest2() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "expression test 2";
+	std::string s = "Main . myFunc ( 1 , Hello )";
+	tokens.push_back(new Token("identifier", "Main"));
+	tokens.push_back(new Token("symbol", "."));
+	tokens.push_back(new Token("identifier", "myFunc"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("integerConstant", "1"));
+	tokens.push_back(new Token("symbol", ","));
+	tokens.push_back(new Token("identifier", "Hello"));
+	tokens.push_back(new Token("symbol", ")"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileExpression();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
+
+
+bool expressionListTest1() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "expression list test 1";
+	std::string s = "1 + ( a + b ) , ( 3 - x ) + b";
+	tokens.push_back(new Token("integerConstant", "1"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("identifier", "b"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", ","));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("integerConstant", "3"));
+	tokens.push_back(new Token("symbol", "-"));
+	tokens.push_back(new Token("identifier", "x"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("identifier", "b"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileExpressionList();
 		std::cout << tree->tostring();
 	} catch (ParseException e) {
 		error = true;
@@ -1721,6 +1806,13 @@ int main(int argc, const char *argv[]){
 	std::cout << "=========================\n";
 	i = 1;
 	printResult(expressionTest1(), i++);
+	printResult(expressionTest2(), i++);
+
+	std::cout << "=========================\n";
+	std::cout << "STARTING EXPRESSION LIST TESTS\n";
+	std::cout << "=========================\n";
+	i = 1;
+	printResult(expressionListTest1(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "TEST SUMMARY\n";

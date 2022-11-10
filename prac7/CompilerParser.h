@@ -18,6 +18,7 @@ struct TokenList {
 
   Token* process_token(); // used when you want to return the token and consume it
   Token* peek(); // used when you only want to see the next token, there is no processing or deletion from the list
+  Token* peek(int i); // used when you only want to see the next token, there is no processing or deletion from the list
   std::string peek_val(int i);
   std::string peek_type(int i);
   std::string tostring();
@@ -95,7 +96,7 @@ namespace gdef {
   const std::unordered_set<std::string> vartypes {
     "int", "char", "boolean"
   };
-  
+
   const std::unordered_set<std::string> ops {
     "+", "-", "*", "/",
 		"&", "|", "<", ">", "=", "~"

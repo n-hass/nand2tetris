@@ -68,6 +68,13 @@ string TokenList::peek_val(int i) {
 Token* TokenList::peek(){
 	return _tks.front();
 }
+Token* TokenList::peek(int i){
+	std::list<Token*>::iterator it;
+	it = _tks.begin();
+	advance(it,i);
+
+	return (*it);
+}
 
 // consumes a token from the list
 Token* TokenList::process_token() {
@@ -958,7 +965,7 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
  * Generates a parse tree for an expression
  */
 ParseTree *CompilerParser::compileExpression() {
-	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
+	ParseTree *tree = new ParseTree("expression", "");
 	
 	ParseTree *x = tlist.peek();
 	if (token_is(x, "keyword", "skip")) {
@@ -981,9 +988,12 @@ ParseTree *CompilerParser::compileExpression() {
 		if (token_is(a, "symbol", ")"))	return true;
 		if (token_is(a, "symbol", "]"))	return true;
 		if (token_is(a, "symbol", ";"))	return true;
+		if (token_is(a, "symbol", ","))	return true;
 		if (token_is(a, "symbol", "}"))	return true;
 		return false;
 	};
+
+	
 	/*
 		put everything in a term unless it is a symbol (operator)
 	*/
@@ -991,12 +1001,12 @@ ParseTree *CompilerParser::compileExpression() {
 		if (is_op(x))
 			tree->addChild(tlist.process_token());
 		else
-		 tree->addChild(compileTerm());
+			tree->addChild(compileTerm());
 		
 		x = tlist.peek();
 	}
-
-	// validate
+	
+	// validate ?
 	
 	return tree;
 }
@@ -1007,11 +1017,33 @@ ParseTree *CompilerParser::compileExpression() {
  */
 ParseTree *CompilerParser::compileTerm() {
 	ParseTree *tree = new ParseTree("term","");
-
 	ParseTree *x = tlist.peek();
-	if (token_not(x, "symbol", "(")) { // if there is no open bracket, it must be a simple term with only one token
-		tree->addChild(tlist.process_token());
-		return tree;
+
+	if (token_not(x, "symbol", "(")) { // if there is no open bracket, is either a simple term or subroutineCall
+		if (x->getType() == "identifier") { // may be subroutine name or className.subroutineName
+
+			tree->addChild(tlist.process_token()); // the first identifier, maybe class name or subroutine name
+
+			x = tlist.peek();
+			if (token_is(x, "symbol", "(")) { // was just a subroutine name, form the subroutine call now
+				tree->addChild(tlist.process_token()); // symbol: (
+				tree->addChild(compileExpressionList());
+				tree->addChild(tlist.process_token()); // symbol: )
+
+			} else if (token_is(x, "symbol", ".")) { // included a class name and symbol '.'
+				tree->addChild(tlist.process_token()); // symbol: '.'
+				tree->addChild(tlist.process_token()); // identfier
+				tree->addChild(tlist.process_token()); // symbol: '('
+				tree->addChild(compileExpressionList());
+				tree->addChild(tlist.process_token()); // symbol: )
+
+			}
+			else return tree; // was a simple term, just return as normal
+		} else if (x->getType() == "integerConstant" || x->getType() == "stringConstant"){
+			tree->addChild(tlist.process_token());
+			return tree;
+		}
+
 	} else if (token_is(x, "symbol", "(")) {
 		tree->addChild(tlist.process_token()); // symbol: (, parse to next ')'
 		x = tlist.peek();
@@ -1032,7 +1064,31 @@ ParseTree *CompilerParser::compileTerm() {
 /**
  * Generates a parse tree for an expression list
  */
-ParseTree *CompilerParser::compileExpressionList() { return NULL; }
+ParseTree *CompilerParser::compileExpressionList() {
+	ParseTree *tree = new ParseTree("expressionList", "");
+
+	auto is_ender = [](ParseTree* a) {
+		// if is ), ], ;, or }
+		if (a==nullptr) return true;
+		if (token_is(a, "symbol", ")"))	return true;
+		if (token_is(a, "symbol", "]"))	return true;
+		if (token_is(a, "symbol", ";"))	return true;
+		if (token_is(a, "symbol", "}"))	return true;
+		return false;
+	};
+	ParseTree *x = tlist.peek();
+	while (is_ender(x) == false) {
+		tree->addChild(compileExpression());
+		
+		// should be left with a ',' symbol at front of list, unless this is the end of the list
+		if (token_is(tlist.peek(),"symbol",","))
+			tree->addChild(tlist.process_token());
+
+		x = tlist.peek();
+	}
+
+	return tree;
+}
 
 const char *ParseException::what() {
   return "An Exception occurred while parsing!";
