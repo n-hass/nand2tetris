@@ -1544,6 +1544,42 @@ bool whileTest4(){
 	return false;
 }
 
+bool whileTest5() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "while test 5";
+	std::string s = "while ( skip ) {}";
+	tokens.push_back(new Token("keyword", "while"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileWhile();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
+
 void printResult(bool result, int testNum){
 
 	if(result){
@@ -1640,6 +1676,7 @@ int main(int argc, const char *argv[]){
 	printResult(whileTest2(), i++);
 	printResult(whileTest3(), i++);
 	printResult(whileTest4(), i++);
+	printResult(whileTest5(), i++);
 
 
 	std::cout << "=========================\n";

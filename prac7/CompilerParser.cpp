@@ -808,17 +808,18 @@ ParseTree *CompilerParser::compileWhile() {
 	};
 
 	// code block of the if statement. can contain statements and/or varDecs
-	ParseTree *x = tlist.peek(); int j=0;
-	while(is_end(x) == false && j < 30) {
-		cout << "DEBUG:" << x->tostring() << endl;
-
+	ParseTree *x = tlist.peek();
+	while(is_end(x) == false) {
+		// cout << "DEBUG:" << x->tostring() << endl;
 		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 			tree->addChild(compileVarDec());
 		else if (is_statement(x))
 		 tree->addChild(compileStatements());
 		x = tlist.peek();
-		j++;
 	}
+	if (token_is(tree->getChildren().back(),"symbol", "{")) 
+			tree->addChild(new ParseTree("statements","")); // add an empty statement tree when none were provided
+
 	tree->addChild(tlist.process_token()); // symbol: }
 
 	if (validateWhile(tree) == false) throw ParseException();
