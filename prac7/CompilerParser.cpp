@@ -407,8 +407,22 @@ bool CompilerParser::validateParameterList(ParseTree *tree) {
 	if (c.size() < 2 || (c.size() != 2 && (c.size()+1)%3 != 0))
 		return false;
 
+
+	auto not_validtype = [](ParseTree *x) {
+		if (x == nullptr) 
+			return true;
+		if (x->getType() == "identifier")
+			return false;
+		if (x->getType() == "keyword" && gdef::vartypes.find(x->getValue()) != gdef::vartypes.end())
+			return false;
+		
+		return true;
+	};
+	
+
+
 	for (int i=0; i<c.size(); i+=3) {
-		if (c[i]->getType() != "keyword" || gdef::vartypes.find(c[i]->getValue()) == gdef::vartypes.end())
+		if (not_validtype(c[i]))
 			return false;
 		if (c[i+1]->getType() != "identifier") // will be last token in param list in the last loop iteration
 			return false;
