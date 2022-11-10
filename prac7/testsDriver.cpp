@@ -1342,6 +1342,64 @@ bool ifTest7() {
 	totalFailedCases++;
 	return false;
 }
+bool ifTest8() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "if test 8 (the long nested one)";
+	std::string s = "if ( skip ) { if ( skip ) { } else { } } else { if ( skip ) { } else { } }";
+	tokens.push_back(new Token("keyword", "if")); 			// if (skip)
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));					// {
+		tokens.push_back(new Token("keyword", "if"));			// 		if (skip)
+		tokens.push_back(new Token("symbol", "("));
+		tokens.push_back(new Token("keyword", "skip"));
+		tokens.push_back(new Token("symbol", ")"));
+		tokens.push_back(new Token("symbol", "{"));				// 		{
+		tokens.push_back(new Token("symbol", "}"));				// 		}
+		tokens.push_back(new Token("keyword", "else"));		// 		else
+		tokens.push_back(new Token("symbol", "{"));				//		{
+		tokens.push_back(new Token("symbol", "}"));				// 		}
+		tokens.push_back(new Token("symbol", "}"));				// }
+	
+	tokens.push_back(new Token("keyword", "else"));			// else
+	tokens.push_back(new Token("symbol", "{"));					// {
+		tokens.push_back(new Token("keyword", "if"));			//		if (skip)
+		tokens.push_back(new Token("symbol", "("));			
+		tokens.push_back(new Token("keyword", "skip"));
+		tokens.push_back(new Token("symbol", ")"));
+		tokens.push_back(new Token("symbol", "{"));				//		{
+		tokens.push_back(new Token("symbol", "}"));				// 		}
+		tokens.push_back(new Token("keyword", "else"));		// 		else
+		tokens.push_back(new Token("symbol", "{"));				//		{
+		tokens.push_back(new Token("symbol", "}"));				// 		}
+
+	tokens.push_back(new Token("symbol", "}"));					// }
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
 
 bool whileTest1(){
 
@@ -1572,6 +1630,7 @@ int main(int argc, const char *argv[]){
 	printResult(ifTest5(), i++);
 	printResult(ifTest6(), i++);
 	printResult(ifTest7(), i++);
+	printResult(ifTest8(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "STARTING WHILE-STATEMENT TESTS\n";

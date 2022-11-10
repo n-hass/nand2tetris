@@ -22,6 +22,17 @@ inline bool token_not(ParseTree* a, const string& type, const string& val) {
 		return true;
 	return false;
 }
+inline bool is_statement (ParseTree* a) {
+		if (a==nullptr) return false;
+		if (token_is(a, "keyword", "return") || 
+		token_is(a, "keyword", "let") || 
+		token_is(a, "keyword", "do") ||
+		token_is(a, "keyword", "if") || 
+		token_is(a, "keyword", "while")
+		)
+			return true;
+		return false;
+};
 
 bool str_contains(const string &a, const char &b) {
   if (a.find(b) == string::npos)
@@ -555,13 +566,17 @@ ParseTree *CompilerParser::compileStatements() {
 
 	// end of statements block = return statement;
 	ParseTree *x = tlist.peek();
-	while (token_is(x, "keyword", "return") || token_is(x, "keyword", "let") || token_is(x, "keyword", "do")) {
+	while (is_statement(x)) {
 		if (x->getValue() == "do")
 			tree->addChild(compileDo());
 		else if (x->getValue() == "let")
 			tree->addChild(compileLet());
 		else if (x->getValue() == "return")
 			tree->addChild(compileReturn());
+		else if (x->getValue() == "if")
+			tree->addChild(compileIf());
+		else if (x->getValue() == "while")
+			tree->addChild(compileWhile());
 		else throw ParseException();
 
 		x = tlist.peek(); // for next iteration
@@ -658,12 +673,6 @@ ParseTree *CompilerParser::compileIf() {
 		if(a == nullptr) return true;
 		return token_is(a, "symbol", "}");
 	};
-	auto is_statement = [](ParseTree* a) {
-		if (a==nullptr) return false;
-		if (token_is(a, "keyword", "return") || token_is(a, "keyword", "let") || token_is(a, "keyword", "do"))
-			return true;
-		return false;
-	};
 
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
@@ -713,35 +722,13 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 
 	vector<ParseTree*> c = tree->getChildren();
 
-	// if (c.size() == 6 || c.size() == 9 || c.size() == 10) // test if you should abort here for if statements
-	// 	return false;
 	/*
-		6 = if with no statement body, 
+		6 = if with no statement body, *shouldnt exist!
 		7 = if with no else, 
-		9 = if with else but no bodies in either
-		10 = if with else but statement body in only one
+		9 = if with else but no bodies in either *shouldnt exist!
+		10 = if with else but statement body in only one *shouldnt exist!
 		11 = if with else and body in both
 	*/
-	// if ( (c.size() == 6) ) {
-	// 	if (token_not(c[0],"keyword","if"))
-	// 		return false; 
-
-	// 	if (token_not(c[1],"symbol","("))
-	// 		return false; 
-
-	// 	if (c[2]->getType() != "expression")
-	// 		return false;
-		
-	// 	if (token_not(c[3],"symbol",")"))
-	// 		return false; 
-
-	// 	if (token_not(c[4],"symbol","{"))
-	// 		return false;
-
-	// 	if (token_not(c[5],"symbol","}"))
-	// 		return false;
-	// }
-	// else 
 	if ( (c.size() == 7) ) {
 		if (token_not(c[0],"keyword","if"))
 			return false; 
@@ -764,75 +751,6 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 		if (token_not(c[6],"symbol","}"))
 			return false;
 	}
-	// else if (c.size() == 9) {
-	// 	if (token_not(c[0],"keyword","if"))
-	// 		return false; 
-
-	// 	if (token_not(c[1],"symbol","("))
-	// 		return false; 
-
-	// 	if (c[2]->getType() != "expression")
-	// 		return false;
-		
-	// 	if (token_not(c[3],"symbol",")"))
-	// 		return false; 
-
-	// 	if (token_not(c[4],"symbol","{"))
-	// 		return false;
-
-	// 	if (token_not(c[5],"symbol","}"))
-	// 		return false;
-
-	// 	if (token_not(c[6],"keyword","else"))
-	// 		return false;
-
-	// 	if (token_not(c[7],"symbol","{"))
-	// 		return false;
-
-	// 	if (token_not(c[8],"symbol","}"))
-	// 		return false;
-	// }
-	// else if (c.size() == 10) { // either if or else doesnt contain an expression body, must determine
-	// 	if (token_not(c[0],"keyword","if"))
-	// 		return false; 
-
-	// 	if (token_not(c[1],"symbol","("))
-	// 		return false; 
-
-	// 	if (c[2]->getType() != "expression")
-	// 		return false;
-		
-	// 	if (token_not(c[3],"symbol",")"))
-	// 		return false; 
-
-	// 	if (token_not(c[4],"symbol","{"))
-	// 		return false;
-
-	// 	if ( token_is(c[5],"symbol", "}") ) {
-	// 		if (token_not(c[6],"keyword","else"))
-	// 			return false;
-	// 		if (token_not(c[7],"symbol","{"))
-	// 			return false;
-	// 		if (c[8]->getType() != "statements" && c[8]->getType() != "varDec")
-	// 			return false;
-	// 		if (token_not(c[9],"symbol","}"))
-	// 			return false;
-
-	// 	} else if (c[5]->getType() == "statements" || c[5]->getType() == "varDec"){
-	// 		if (token_not(c[6],"symbol","}"))
-	// 			return false;
-
-	// 		if (token_not(c[7],"keyword","else"))
-	// 			return false;
-
-	// 		if (token_not(c[8],"symbol","{"))
-	// 			return false;
-
-	// 		if (token_not(c[9],"symbol","}"))
-	// 			return false;
-	// 	} else return false;
-
-	// } 
 	else if (c.size() == 11) {
 		if (token_not(c[0],"keyword","if"))
 			return false; 
@@ -887,12 +805,6 @@ ParseTree *CompilerParser::compileWhile() {
 	auto is_end = [](ParseTree* a) {
 		if(a == nullptr) return true;
 		return token_is(a, "symbol", "}");
-	};
-	auto is_statement = [](ParseTree* a) {
-		if (a==nullptr) return false;
-		if (token_is(a, "keyword", "return") || token_is(a, "keyword", "let") || token_is(a, "keyword", "do"))
-			return true;
-		return false;
 	};
 
 	// code block of the if statement. can contain statements and/or varDecs
