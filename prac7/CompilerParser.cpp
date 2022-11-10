@@ -1039,7 +1039,7 @@ ParseTree *CompilerParser::compileTerm() {
 
 			}
 			else return tree; // was a simple term, just return as normal
-		} else if (x->getType() == "integerConstant" || x->getType() == "stringConstant"){
+		} else if (x->getType() == "integerConstant" || x->getType() == "stringConstant" || token_is(x, "keyword", "true") || token_is(x, "keyword", "false") || token_is(x, "keyword", "void") || token_is(x, "keyword", "this")){
 			tree->addChild(tlist.process_token());
 			return tree;
 		}

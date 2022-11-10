@@ -1656,6 +1656,50 @@ bool expressionTest2() {
 	totalFailedCases++;
 	return false;
 }
+bool expressionTest3() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "expression test 3";
+	std::string s = "( ( a + ( 1 - c ) ) > 5 ) = true";
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("integerConstant", "1"));
+	tokens.push_back(new Token("symbol", "-"));
+	tokens.push_back(new Token("identifier", "c"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", ">"));
+	tokens.push_back(new Token("integerConstant", "5"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("keyword", "true"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileExpression();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
 
 
 bool expressionListTest1() {
@@ -1807,6 +1851,7 @@ int main(int argc, const char *argv[]){
 	i = 1;
 	printResult(expressionTest1(), i++);
 	printResult(expressionTest2(), i++);
+	printResult(expressionTest3(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "STARTING EXPRESSION LIST TESTS\n";
@@ -1832,4 +1877,3 @@ int main(int argc, const char *argv[]){
 
 	return 0;
 }
-
