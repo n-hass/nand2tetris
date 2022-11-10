@@ -589,7 +589,7 @@ ParseTree *CompilerParser::compileStatements() {
 		x = tlist.peek(); // for next iteration
 	}
 
-	// do something here. Check the loop exited for the right reason, ie, why should a block of statements end? next thing is varDec or }?
+	// maybe do something here. Check the loop exited for the right reason, ie, why should a block of statements end? answer: next thing is a varDec or }
 
 	return tree;
 }
@@ -683,9 +683,7 @@ ParseTree *CompilerParser::compileIf() {
 
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
-		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
-			tree->addChild(compileVarDec());
-		else if (is_statement(x))
+		if (is_statement(x))
 		  tree->addChild(compileStatements());
 		else throw ParseException();
 		x = tlist.peek();
@@ -702,9 +700,7 @@ ParseTree *CompilerParser::compileIf() {
 		tree->addChild(tlist.process_token()); // symbol: {
 		x = tlist.peek();
 		while(is_end(x) == false) {
-			if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
-				tree->addChild(compileVarDec());
-			else if (is_statement(x))
+			if (is_statement(x))
 				tree->addChild(compileStatements());
 			else throw ParseException();
 
@@ -818,10 +814,8 @@ ParseTree *CompilerParser::compileWhile() {
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
 		// cout << "DEBUG:" << x->tostring() << endl;
-		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
-			tree->addChild(compileVarDec());
-		else if (is_statement(x))
-		 tree->addChild(compileStatements());
+		if (is_statement(x))
+			tree->addChild(compileStatements());
 		x = tlist.peek();
 	}
 	if (token_is(tree->getChildren().back(),"symbol", "{")) 
@@ -949,18 +943,6 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
 	return true;
 }
 
-// // compileExpression() for all other sections (skip as placeholder)
-// /**
-//  * Generates a parse tree for an expression
-//  */
-// ParseTree *CompilerParser::compileExpression() {
-// 	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
-// 	tree->addChild(new Token("keyword", "skip"));
-// 	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";") && token_not(tlist.peek(), "symbol", "]"))
-// 		tlist.process_token();
-// 	return tree;
-// }
-
 /**
  * Generates a parse tree for an expression
  */
@@ -993,7 +975,6 @@ ParseTree *CompilerParser::compileExpression() {
 		return false;
 	};
 
-	
 	/*
 		put everything in a term unless it is a symbol (operator)
 	*/
@@ -1016,11 +997,12 @@ ParseTree *CompilerParser::compileExpression() {
  * Generates a parse tree for an expression term
  */
 ParseTree *CompilerParser::compileTerm() {
+	// cout << "DEBUG: compiling term" << endl;
 	ParseTree *tree = new ParseTree("term","");
 	ParseTree *x = tlist.peek();
 
 	if (token_not(x, "symbol", "(")) { // if there is no open bracket, is either a simple term or subroutineCall
-		if (!((x->getType() == "integerConstant" || x->getType() == "stringConstant" || token_is(x, "keyword", "true") || token_is(x, "keyword", "false") || token_is(x, "keyword", "void") || token_is(x, "keyword", "this")))) { // may be subroutine name or className.subroutineName
+		if (x->getType() == "identifier") { // may be subroutine name or className.subroutineName
 
 			tree->addChild(tlist.process_token()); // the first identifier, maybe class name or subroutine name
 
