@@ -74,7 +74,7 @@ Token* TokenList::process_token() {
 			throw ParseException();
 		
 	} else if (t->getType()=="integerConstant") {
-		int x = stoi(t->getType());
+		int x = stoi(t->getValue());
 		if ( x < 0 || x > 32767)
 			throw ParseException();
 
@@ -636,8 +636,9 @@ ParseTree *CompilerParser::compileIf() {
 		while(is_end(x) == false) {
 			if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 				tree->addChild(compileVarDec());
-			else
+			else if (is_statement(x))
 				tree->addChild(compileStatements());
+			else throw ParseException();
 
 			x = tlist.peek();
 		}
@@ -824,16 +825,23 @@ ParseTree *CompilerParser::compileWhile() {
 	tree->addChild(tlist.process_token()); // symbol: )
 	tree->addChild(tlist.process_token()); // symbol: {
 	
-	// code block of the if statement. can contain statements and/or varDecs
 	auto is_end = [](ParseTree* a) {
 		if(a == nullptr) return true;
 		return token_is(a, "symbol", "}");
 	};
+	auto is_statement = [](ParseTree* a) {
+		if (a==nullptr) return false;
+		if (token_is(a, "keyword", "return") || token_is(a, "keyword", "let") || token_is(a, "keyword", "do"))
+			return true;
+		return false;
+	};
+
+	// code block of the if statement. can contain statements and/or varDecs
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
 		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 			tree->addChild(compileVarDec());
-		else
+		else if (is_statement(x))
 		 tree->addChild(compileStatements());
 		x = tlist.peek();
 	}
@@ -965,7 +973,8 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
 ParseTree *CompilerParser::compileExpression() {
 	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
 	tree->addChild(new Token("keyword", "skip"));
-	tlist.process_token(); // consume a token
+	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";"))
+		tlist.process_token();
 	return tree;
 }
 
