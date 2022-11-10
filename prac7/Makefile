@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -g -Wall -Wno-overloaded-virtual
-.PHONY: clean
+.PHONY: clean test
 
 # includes go here
 
@@ -13,6 +13,12 @@ all: main
 
 main: main.cpp $(OBJ)
 	$(CXX) $(CXXFLAGS) -o main Main.cpp $(OBJ)
+
+test: tests
+	./tests
+
+tests: testsDriver.cpp $(OBJ)
+	$(CXX) $(CXXFLAGS) -o tests testsDriver.cpp $(OBJ)
 
 # ### clean targets ###
 clean:

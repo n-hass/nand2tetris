@@ -10,11 +10,13 @@
 using namespace std;
 
 inline bool token_is(ParseTree* a, const string& type, const string& val) {
+	if (a==nullptr) return false;
 	if (a->getType() == type && a->getValue() == val)
 		return true;
 	return false;
 }
 inline bool token_not(ParseTree* a, const string& type, const string& val) {
+	if (a==nullptr) return false;
 	if (a->getType() != type || a->getValue() != val)
 		return true;
 	return false;
@@ -120,7 +122,7 @@ CompilerParser::CompilerParser(std::vector<Token *> tokens) {
 ParseTree *CompilerParser::compileProgram() {
   // the top root of a Jack program must be a class - everything is in a class
   if ( tlist.peek_val(0) == "class") { // validation
-    if (tlist.peek_val(1) == "Main")
+    if (tlist.peek_val(1) == "Main" || tlist.peek_val(1) == "main")
       return compileClass();
   } else {
     throw ParseException();
@@ -415,10 +417,7 @@ ParseTree *CompilerParser::compileSubroutineBody() {
 
 	auto is_end = [](ParseTree* a) {
 		if(a == nullptr) return true;
-		if(a->getType() == "symbol")
-			if (a->getValue() == "}")
-				return true;
-		return false;
+		return token_is(a, "symbol", "}");
 	};
 	ParseTree *x = tlist.peek();
 	while(is_end(x) == false) {
@@ -426,6 +425,7 @@ ParseTree *CompilerParser::compileSubroutineBody() {
 			tree->addChild(compileVarDec());
 		else
 		 tree->addChild(compileStatements());
+		x = tlist.peek();
 	}
 	tree->addChild(tlist.process_token()); // symbol: '}'
 
@@ -496,8 +496,10 @@ bool CompilerParser::validateVarDec(ParseTree* tree) {
 	if (c[0]->getType() != "keyword" || (c[0]->getValue() != "var"))
 		throw ParseException();
 	
-	if (c[1]->getType() != "keyword" || gdef::vartypes.find(c[1]->getValue()) == gdef::vartypes.end())
-		throw ParseException();
+	if (c[1]->getType() != "identifier") { // if the type is not an ADT 
+		if (c[1]->getType() != "keyword" || gdef::vartypes.find(c[1]->getValue()) == gdef::vartypes.end())
+			throw ParseException();
+	}
 	
 	// identifier list
 	for (int i=2; i<c.size()-1; i++) {
@@ -527,11 +529,12 @@ ParseTree *CompilerParser::compileStatements() {
 	while (token_is(x, "keyword", "return") || token_is(x, "keyword", "let") || token_is(x, "keyword", "do")) {
 		if (x->getValue() == "do")
 			tree->addChild(compileDo());
-		if (x->getValue() == "let")
+		else if (x->getValue() == "let")
 			tree->addChild(compileLet());
-		if (x->getValue() == "return")
+		else if (x->getValue() == "return")
 			tree->addChild(compileReturn());
-		
+
+		x = tlist.peek(); // for next iteration
 	}
 
 	return tree;
@@ -540,32 +543,302 @@ ParseTree *CompilerParser::compileStatements() {
 /**
  * Generates a parse tree for a let statement
  */
-ParseTree *CompilerParser::compileLet() { return NULL; }
+ParseTree *CompilerParser::compileLet() {
+	ParseTree *tree = new ParseTree ("letStatement", "");
+
+	tree->addChild(tlist.process_token()); // keyword: let
+	tree->addChild(tlist.process_token()); // an identifier
+	tree->addChild(tlist.process_token()); // symbol: =
+
+	tree->addChild(compileExpression()); // the expression to evaluate
+
+	tree->addChild(tlist.process_token()); // symbol: ;
+
+	if (validateLet(tree) == false) throw ParseException();
+
+	return tree;
+}
+
+bool CompilerParser::validateLet(ParseTree *tree) {
+	if (token_not(tree, "letStatement", ""))
+		return false;
+
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c.size() != 5)
+		return false;
+	
+	
+	if (token_not(c[0],"keyword","let"))
+		return false; 
+
+	if (c[1]->getType() != "identifier")
+		return false;
+	
+	if (token_not(c[2],"symbol","="))
+		return false; 
+
+	if (c[3]->getType() != "expression")
+		return false;
+
+	if (token_not(c[4],"symbol",";"))
+		return false; 
+
+	return true;
+}
 
 /**
  * Generates a parse tree for an if statement
  */
-ParseTree *CompilerParser::compileIf() { return NULL; }
+ParseTree *CompilerParser::compileIf() {
+	ParseTree *tree = new ParseTree ("ifStatement", "");
+
+	tree->addChild(tlist.process_token()); // keyword: if
+	tree->addChild(tlist.process_token()); // symbol: (
+	tree->addChild(compileExpression()); // the expression to evaluate
+	tree->addChild(tlist.process_token()); // symbol: )
+	tree->addChild(tlist.process_token()); // symbol: {
+	
+	// code block of the if statement. can contain statements and/or varDecs
+	auto is_end = [](ParseTree* a) {
+		if(a == nullptr) return true;
+		return token_is(a, "symbol", "}");
+	};
+	ParseTree *x = tlist.peek();
+	while(is_end(x) == false) {
+		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
+			tree->addChild(compileVarDec());
+		else
+		 tree->addChild(compileStatements());
+		x = tlist.peek();
+	}
+	tree->addChild(tlist.process_token()); // symbol: }
+
+	// may be the end, but need to check if there is an else block
+
+	x = tlist.peek();
+	if (token_is(x, "keyword", "else")) {
+		tree->addChild(tlist.process_token()); // keyword: else
+		tree->addChild(tlist.process_token()); // symbol: {
+		while(is_end(x) == false) {
+			if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
+				tree->addChild(compileVarDec());
+			else
+				tree->addChild(compileStatements());
+
+			x = tlist.peek();
+		}
+		tree->addChild(tlist.process_token()); // symbol: }
+	}
+
+	if (validateIf(tree) == false) throw ParseException();
+
+	return tree;
+}
+
+bool CompilerParser::validateIf(ParseTree *tree) {
+	if (token_not(tree, "ifStatement", ""))
+		return false;
+
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c.size() != 7 || c.size() != 11)
+		return false;
+	
+	if (token_not(c[0],"keyword","if"))
+		return false; 
+
+	if (token_not(c[1],"symbol","("))
+		return false; 
+
+	if (c[2]->getType() != "expression")
+		return false;
+	
+	if (token_not(c[3],"symbol",")"))
+		return false; 
+
+	if (token_not(c[4],"symbol","{"))
+		return false;
+
+	if (c[5]->getType() != "statements" && c[5]->getType() != "varDec")
+		return false;
+
+	if (token_not(c[6],"symbol","}"))
+		return false;
+	
+	if (c.size() == 7) // if this is the end of the tree
+		return true;
+
+	if (token_not(c[7],"keyword","else"))
+		return false;
+
+	if (token_not(c[8],"symbol","{"))
+		return false;
+
+	if (c[9]->getType() != "statements" && c[9]->getType() != "varDec")
+		return false;
+
+	if (token_not(c[10],"symbol","}"))
+		return false;
+
+	return true;
+}
 
 /**
  * Generates a parse tree for a while statement
  */
-ParseTree *CompilerParser::compileWhile() { return NULL; }
+ParseTree *CompilerParser::compileWhile() {
+	ParseTree *tree = new ParseTree ("whileStatement", "");
+
+	tree->addChild(tlist.process_token()); // keyword: while
+	tree->addChild(tlist.process_token()); // symbol: (
+	tree->addChild(compileExpression()); // the expression to evaluate
+	tree->addChild(tlist.process_token()); // symbol: )
+	tree->addChild(tlist.process_token()); // symbol: {
+	
+	// code block of the if statement. can contain statements and/or varDecs
+	auto is_end = [](ParseTree* a) {
+		if(a == nullptr) return true;
+		return token_is(a, "symbol", "}");
+	};
+	ParseTree *x = tlist.peek();
+	while(is_end(x) == false) {
+		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
+			tree->addChild(compileVarDec());
+		else
+		 tree->addChild(compileStatements());
+		x = tlist.peek();
+	}
+	tree->addChild(tlist.process_token()); // symbol: }
+
+	if (validateWhile(tree) == false) throw ParseException();
+
+	return tree;
+}
+bool CompilerParser::validateWhile(ParseTree *tree) {
+	if (token_not(tree, "whileStatement", ""))
+		return false;
+
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c.size() != 7)
+		return false;
+	
+	if (token_not(c[0],"keyword","while"))
+		return false; 
+
+	if (token_not(c[1],"symbol","("))
+		return false; 
+
+	if (c[2]->getType() != "expression")
+		return false;
+	
+	if (token_not(c[3],"symbol",")"))
+		return false; 
+
+	if (token_not(c[4],"symbol","{"))
+		return false;
+
+	if (c[5]->getType() != "statements" && c[5]->getType() != "varDec")
+		return false;
+
+	if (token_not(c[6],"symbol","}"))
+		return false;
+
+	return true;
+}
 
 /**
  * Generates a parse tree for a do statement
  */
-ParseTree *CompilerParser::compileDo() { return NULL; }
+ParseTree *CompilerParser::compileDo() {
+	ParseTree *tree = new ParseTree ("doStatement", "");
+
+	tree->addChild(tlist.process_token()); // keyword: do
+	tree->addChild(compileExpression()); // the expression to do
+	tree->addChild(tlist.process_token()); // symbol: ;
+
+	if (validateDo(tree) == false) throw ParseException();
+
+	return tree;
+}
+bool CompilerParser::validateDo(ParseTree *tree) {
+	if (token_not(tree, "doStatement", ""))
+		return false;
+
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c.size() != 3)
+		return false;
+	
+	if (token_not(c[0],"keyword","do"))
+		return false; 
+
+	if (c[1]->getType() != "expression")
+		return false;
+
+	if (token_not(c[2],"symbol",";"))
+		return false;
+
+	return true;
+}
 
 /**
  * Generates a parse tree for a return statement
  */
-ParseTree *CompilerParser::compileReturn() { return NULL; }
+ParseTree *CompilerParser::compileReturn() {
+	ParseTree *tree = new ParseTree ("returnStatement", "");
+
+	tree->addChild(tlist.process_token()); // keyword: return
+
+	if (token_not(tlist.peek(), "symbol", ";")) { // if this is an expression to evaluate
+		tree->addChild(compileExpression()); // the expression to evaluate
+	}
+
+	tree->addChild(tlist.process_token()); // symbol: ;
+
+	if (token_not(tlist.peek(),"symbol", "}")) // the next token after a return should always be a }
+		throw ParseException();
+
+	if (validateReturn(tree) == false) throw ParseException();
+
+	return tree;
+}
+bool CompilerParser::validateReturn(ParseTree *tree) {
+	if (token_not(tree, "returnStatement", ""))
+		return false;
+
+	vector<ParseTree*> c = tree->getChildren();
+
+	if (c.size() == 2){
+		if (token_not(c[0],"keyword","return"))
+		return false; 
+
+	if (token_not(c[1],"symbol",";"))
+		return false;
+
+	} else if (c.size() == 3) {
+		if (token_not(c[0],"keyword","return"))
+			return false; 
+
+		if (c[1]->getType() != "expression")
+			return false;
+
+		if (token_not(c[2],"symbol",";"))
+			return false;
+	} else return false;
+	
+	return true;
+}
 
 /**
  * Generates a parse tree for an expression
  */
-ParseTree *CompilerParser::compileExpression() { return NULL; }
+ParseTree *CompilerParser::compileExpression() {
+	ParseTree *tree = new ParseTree("expression", "skip"); // TEMPORARY SKIP
+	tlist.process_token(); // consume a token
+	return tree;
+}
 
 /**
  * Generates a parse tree for an expression term
