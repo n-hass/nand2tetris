@@ -9,6 +9,17 @@
 
 using namespace std;
 
+inline bool token_is(ParseTree* a, const string& type, const string& val) {
+	if (a->getType() == type && a->getValue() == val)
+		return true;
+	return false;
+}
+inline bool token_not(ParseTree* a, const string& type, const string& val) {
+	if (a->getType() != type || a->getValue() != val)
+		return true;
+	return false;
+}
+
 bool str_contains(const string &a, const char &b) {
   if (a.find(b) == string::npos)
     return false;
@@ -512,16 +523,16 @@ ParseTree *CompilerParser::compileStatements() {
 	ParseTree *tree = new ParseTree ("statements", "");
 
 	// end of statements block = return statement;
-	auto is_end = [](ParseTree* a) {
-		if(a == nullptr) return true;
-		if(a->getType() == "symbol")
-			if (a->getValue() == "}")
-				return true;
-		return false;
-	};
 	ParseTree *x = tlist.peek();
-
-
+	while (token_is(x, "keyword", "return") || token_is(x, "keyword", "let") || token_is(x, "keyword", "do")) {
+		if (x->getValue() == "do")
+			tree->addChild(compileDo());
+		if (x->getValue() == "let")
+			tree->addChild(compileLet());
+		if (x->getValue() == "return")
+			tree->addChild(compileReturn());
+		
+	}
 
 	return tree;
 }
