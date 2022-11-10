@@ -947,51 +947,49 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
  * Generates a parse tree for an expression
  */
 ParseTree *CompilerParser::compileExpression() {
-	cout << "DEBUG: compiling expression" << endl;
-	cout << tlist.tostring();
-	// ParseTree *tree = new ParseTree("expression", "");
+	ParseTree *tree = new ParseTree("expression", "");
 	
-	// ParseTree *x = tlist.peek();
-	// if (token_is(x, "keyword", "skip")) {
-	// 	tree->addChild(tlist.process_token()); // keyword: skip
-	// 	return tree;
-	// }
+	ParseTree *x = tlist.peek();
+	if (token_is(x, "keyword", "skip")) {
+		tree->addChild(tlist.process_token()); // keyword: skip
+		return tree;
+	}
 
 
-	// auto is_op = [](ParseTree* a){
-	// 	if (a==nullptr) return false;
-	// 	if (a->getType() == "symbol"){
-	// 		if (gdef::ops.find(a->getValue()) != gdef::keywords.end())
-	// 			return true;
-	// 	}
-	// 	return false;
-	// };
-	// auto is_ender = [](ParseTree* a) {
-	// 	// if is ), ], ;, or }
-	// 	if (a==nullptr) return true;
-	// 	if (token_is(a, "symbol", ")"))	return true;
-	// 	if (token_is(a, "symbol", "]"))	return true;
-	// 	if (token_is(a, "symbol", ";"))	return true;
-	// 	if (token_is(a, "symbol", ","))	return true;
-	// 	if (token_is(a, "symbol", "}"))	return true;
-	// 	return false;
-	// };
+	auto is_op = [](ParseTree* a){
+		if (a==nullptr) return false;
+		if (a->getType() == "symbol"){
+			if (gdef::ops.find(a->getValue()) != gdef::keywords.end())
+				return true;
+		}
+		return false;
+	};
+	auto is_ender = [](ParseTree* a) {
+		// if is ), ], ;, or }
+		if (a==nullptr) return true;
+		if (token_is(a, "symbol", ")"))	return true;
+		if (token_is(a, "symbol", "]"))	return true;
+		if (token_is(a, "symbol", ";"))	return true;
+		if (token_is(a, "symbol", ","))	return true;
+		if (token_is(a, "symbol", "}"))	return true;
+		return false;
+	};
 
-	// /*
-	// 	put everything in a term unless it is a symbol (operator)
-	// */
-	// while(is_ender(x) == false) { // all 'ending/ender' tokens nested should be consumed by compileTerm
-	// 	if (is_op(x))
-	// 		tree->addChild(tlist.process_token());
-	// 	else
-	// 		tree->addChild(compileTerm());
+	/*
+		put everything in a term unless it is a symbol (operator)
+	*/
+	while(is_ender(x) == false) { // all 'ending/ender' tokens nested should be consumed by compileTerm
+		if (is_op(x))
+			tree->addChild(tlist.process_token());
+		else
+			tree->addChild(compileTerm());
 		
-	// 	x = tlist.peek();
-	// }
+		x = tlist.peek();
+	}
 	
-	// // validate ?
+	// validate ?
 	
-	// return tree;
+	return tree;
 }
 
 
@@ -999,82 +997,78 @@ ParseTree *CompilerParser::compileExpression() {
  * Generates a parse tree for an expression term
  */
 ParseTree *CompilerParser::compileTerm() {
-	cout << "DEBUG: compiling term" << endl;
-	cout << tlist.tostring();
-	// ParseTree *tree = new ParseTree("term","");
-	// ParseTree *x = tlist.peek();
+	ParseTree *tree = new ParseTree("term","");
+	ParseTree *x = tlist.peek();
 
-	// if (token_not(x, "symbol", "(")) { // if there is no open bracket, is either a simple term or subroutineCall
-	// 	if (x->getType() == "identifier") { // may be subroutine name or className.subroutineName
+	if (token_not(x, "symbol", "(")) { // if there is no open bracket, is either a simple term or subroutineCall
+		if (x->getType() == "identifier") { // may be subroutine name or className.subroutineName
 
-	// 		tree->addChild(tlist.process_token()); // the first identifier, maybe class name or subroutine name
+			tree->addChild(tlist.process_token()); // the first identifier, maybe class name or subroutine name
 
-	// 		x = tlist.peek();
-	// 		if (token_is(x, "symbol", "(")) { // was just a subroutine name, form the subroutine call now
-	// 			tree->addChild(tlist.process_token()); // symbol: (
-	// 			tree->addChild(compileExpressionList());
-	// 			tree->addChild(tlist.process_token()); // symbol: )
+			x = tlist.peek();
+			if (token_is(x, "symbol", "(")) { // was just a subroutine name, form the subroutine call now
+				tree->addChild(tlist.process_token()); // symbol: (
+				tree->addChild(compileExpressionList());
+				tree->addChild(tlist.process_token()); // symbol: )
 
-	// 		} else if (token_is(x, "symbol", ".")) { // included a class name and symbol '.'
-	// 			tree->addChild(tlist.process_token()); // symbol: '.'
-	// 			tree->addChild(tlist.process_token()); // identfier
-	// 			tree->addChild(tlist.process_token()); // symbol: '('
-	// 			tree->addChild(compileExpressionList());
-	// 			tree->addChild(tlist.process_token()); // symbol: )
+			} else if (token_is(x, "symbol", ".")) { // included a class name and symbol '.'
+				tree->addChild(tlist.process_token()); // symbol: '.'
+				tree->addChild(tlist.process_token()); // identfier
+				tree->addChild(tlist.process_token()); // symbol: '('
+				tree->addChild(compileExpressionList());
+				tree->addChild(tlist.process_token()); // symbol: )
 
-	// 		}
-	// 		else return tree; // was a simple term, just return as normal
-	// 	} else if (x->getType() == "integerConstant" || x->getType() == "stringConstant" || token_is(x, "keyword", "true") || token_is(x, "keyword", "false") || token_is(x, "keyword", "void") || token_is(x, "keyword", "this")){
-	// 		tree->addChild(tlist.process_token());
-	// 		return tree;
-	// 	}
+			}
+			else return tree; // was a simple term, just return as normal
+		} else if (x->getType() == "integerConstant" || x->getType() == "stringConstant" || token_is(x, "keyword", "true") || token_is(x, "keyword", "false") || token_is(x, "keyword", "void") || token_is(x, "keyword", "this")){
+			tree->addChild(tlist.process_token());
+			return tree;
+		}
 
-	// } else if (token_is(x, "symbol", "(")) {
-	// 	tree->addChild(tlist.process_token()); // symbol: (, parse to next ')'
-	// 	x = tlist.peek();
+	} else if (token_is(x, "symbol", "(")) {
+		tree->addChild(tlist.process_token()); // symbol: (, parse to next ')'
+		x = tlist.peek();
 		
-	// 	while (token_not(x, "symbol", ")")) {
-	// 		tree->addChild(compileExpression());
-	// 		x = tlist.peek();
-	// 	}
-	// 	if (token_is(x, "symbol", ")"))
-	// 		tree->addChild(tlist.process_token());
-	// 	else throw ParseException();
+		while (token_not(x, "symbol", ")")) {
+			tree->addChild(compileExpression());
+			x = tlist.peek();
+		}
+		if (token_is(x, "symbol", ")"))
+			tree->addChild(tlist.process_token());
+		else throw ParseException();
 
-	// } else throw ParseException();
+	} else throw ParseException();
 
-	// return tree;
+	return tree;
 }
 
 /**
  * Generates a parse tree for an expression list
  */
 ParseTree *CompilerParser::compileExpressionList() {
-	cout << "DEBUG: compiling list" << endl;
-	cout << tlist.tostring();
-	// ParseTree *tree = new ParseTree("expressionList", "");
+	ParseTree *tree = new ParseTree("expressionList", "");
 
-	// auto is_ender = [](ParseTree* a) {
-	// 	// if is ), ], ;, or }
-	// 	if (a==nullptr) return true;
-	// 	if (token_is(a, "symbol", ")"))	return true;
-	// 	if (token_is(a, "symbol", "]"))	return true;
-	// 	if (token_is(a, "symbol", ";"))	return true;
-	// 	if (token_is(a, "symbol", "}"))	return true;
-	// 	return false;
-	// };
-	// ParseTree *x = tlist.peek();
-	// while (is_ender(x) == false) {
-	// 	tree->addChild(compileExpression());
+	auto is_ender = [](ParseTree* a) {
+		// if is ), ], ;, or }
+		if (a==nullptr) return true;
+		if (token_is(a, "symbol", ")"))	return true;
+		if (token_is(a, "symbol", "]"))	return true;
+		if (token_is(a, "symbol", ";"))	return true;
+		if (token_is(a, "symbol", "}"))	return true;
+		return false;
+	};
+	ParseTree *x = tlist.peek();
+	while (is_ender(x) == false) {
+		tree->addChild(compileExpression());
 		
-	// 	// should be left with a ',' symbol at front of list, unless this is the end of the list
-	// 	if (token_is(tlist.peek(),"symbol",","))
-	// 		tree->addChild(tlist.process_token());
+		// should be left with a ',' symbol at front of list, unless this is the end of the list
+		if (token_is(tlist.peek(),"symbol",","))
+			tree->addChild(tlist.process_token());
 
-	// 	x = tlist.peek();
-	// }
+		x = tlist.peek();
+	}
 
-	// return tree;
+	return tree;
 }
 
 const char *ParseException::what() {
