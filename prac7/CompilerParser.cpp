@@ -1020,7 +1020,7 @@ ParseTree *CompilerParser::compileTerm() {
 	ParseTree *x = tlist.peek();
 
 	if (token_not(x, "symbol", "(")) { // if there is no open bracket, is either a simple term or subroutineCall
-		if (x->getType() == "identifier") { // may be subroutine name or className.subroutineName
+		if (x->getType() == "identifier" || !((x->getType() == "integerConstant" || x->getType() == "stringConstant" || token_is(x, "keyword", "true") || token_is(x, "keyword", "false") || token_is(x, "keyword", "void") || token_is(x, "keyword", "this")))) { // may be subroutine name or className.subroutineName
 
 			tree->addChild(tlist.process_token()); // the first identifier, maybe class name or subroutine name
 
