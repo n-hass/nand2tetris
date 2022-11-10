@@ -674,6 +674,8 @@ ParseTree *CompilerParser::compileIf() {
 		else throw ParseException();
 		x = tlist.peek();
 	}
+	if (token_is(tree->getChildren().back(),"symbol", "{"))
+		tree->addChild(new ParseTree("statements","")); // add an empty statement tree when none were provided
 	tree->addChild(tlist.process_token()); // symbol: }
 
 	// may be the end, but need to check if there is an else block
@@ -693,6 +695,9 @@ ParseTree *CompilerParser::compileIf() {
 			x = tlist.peek();
 		}
 		if (token_not(tlist.peek(),"symbol","}")) throw ParseException();
+		if (token_is(tree->getChildren().back(),"symbol", "{")) 
+			tree->addChild(new ParseTree("statements","")); // add an empty statement tree when none were provided
+		
 		tree->addChild(tlist.process_token()); // symbol: }
 	}
 
@@ -708,8 +713,8 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 
 	vector<ParseTree*> c = tree->getChildren();
 
-	if (c.size() == 6 || c.size() == 9 || c.size() == 10) // test if you should abort here for if statements
-		return false;
+	// if (c.size() == 6 || c.size() == 9 || c.size() == 10) // test if you should abort here for if statements
+	// 	return false;
 	/*
 		6 = if with no statement body, 
 		7 = if with no else, 
@@ -717,26 +722,27 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 		10 = if with else but statement body in only one
 		11 = if with else and body in both
 	*/
-	if ( (c.size() == 6) ) {
-		if (token_not(c[0],"keyword","if"))
-			return false; 
+	// if ( (c.size() == 6) ) {
+	// 	if (token_not(c[0],"keyword","if"))
+	// 		return false; 
 
-		if (token_not(c[1],"symbol","("))
-			return false; 
+	// 	if (token_not(c[1],"symbol","("))
+	// 		return false; 
 
-		if (c[2]->getType() != "expression")
-			return false;
+	// 	if (c[2]->getType() != "expression")
+	// 		return false;
 		
-		if (token_not(c[3],"symbol",")"))
-			return false; 
+	// 	if (token_not(c[3],"symbol",")"))
+	// 		return false; 
 
-		if (token_not(c[4],"symbol","{"))
-			return false;
+	// 	if (token_not(c[4],"symbol","{"))
+	// 		return false;
 
-		if (token_not(c[5],"symbol","}"))
-			return false;
-	}
-	else if ( (c.size() == 7) ) {
+	// 	if (token_not(c[5],"symbol","}"))
+	// 		return false;
+	// }
+	// else 
+	if ( (c.size() == 7) ) {
 		if (token_not(c[0],"keyword","if"))
 			return false; 
 
@@ -758,75 +764,76 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 		if (token_not(c[6],"symbol","}"))
 			return false;
 	}
-	else if (c.size() == 9) {
-		if (token_not(c[0],"keyword","if"))
-			return false; 
+	// else if (c.size() == 9) {
+	// 	if (token_not(c[0],"keyword","if"))
+	// 		return false; 
 
-		if (token_not(c[1],"symbol","("))
-			return false; 
+	// 	if (token_not(c[1],"symbol","("))
+	// 		return false; 
 
-		if (c[2]->getType() != "expression")
-			return false;
+	// 	if (c[2]->getType() != "expression")
+	// 		return false;
 		
-		if (token_not(c[3],"symbol",")"))
-			return false; 
+	// 	if (token_not(c[3],"symbol",")"))
+	// 		return false; 
 
-		if (token_not(c[4],"symbol","{"))
-			return false;
+	// 	if (token_not(c[4],"symbol","{"))
+	// 		return false;
 
-		if (token_not(c[5],"symbol","}"))
-			return false;
+	// 	if (token_not(c[5],"symbol","}"))
+	// 		return false;
 
-		if (token_not(c[6],"keyword","else"))
-			return false;
+	// 	if (token_not(c[6],"keyword","else"))
+	// 		return false;
 
-		if (token_not(c[7],"symbol","{"))
-			return false;
+	// 	if (token_not(c[7],"symbol","{"))
+	// 		return false;
 
-		if (token_not(c[8],"symbol","}"))
-			return false;
-	}
-	else if (c.size() == 10) { // either if or else doesnt contain an expression body, must determine
-		if (token_not(c[0],"keyword","if"))
-			return false; 
+	// 	if (token_not(c[8],"symbol","}"))
+	// 		return false;
+	// }
+	// else if (c.size() == 10) { // either if or else doesnt contain an expression body, must determine
+	// 	if (token_not(c[0],"keyword","if"))
+	// 		return false; 
 
-		if (token_not(c[1],"symbol","("))
-			return false; 
+	// 	if (token_not(c[1],"symbol","("))
+	// 		return false; 
 
-		if (c[2]->getType() != "expression")
-			return false;
+	// 	if (c[2]->getType() != "expression")
+	// 		return false;
 		
-		if (token_not(c[3],"symbol",")"))
-			return false; 
+	// 	if (token_not(c[3],"symbol",")"))
+	// 		return false; 
 
-		if (token_not(c[4],"symbol","{"))
-			return false;
+	// 	if (token_not(c[4],"symbol","{"))
+	// 		return false;
 
-		if ( token_is(c[5],"symbol", "}") ) {
-			if (token_not(c[6],"keyword","else"))
-				return false;
-			if (token_not(c[7],"symbol","{"))
-				return false;
-			if (c[8]->getType() != "statements" && c[8]->getType() != "varDec")
-				return false;
-			if (token_not(c[9],"symbol","}"))
-				return false;
+	// 	if ( token_is(c[5],"symbol", "}") ) {
+	// 		if (token_not(c[6],"keyword","else"))
+	// 			return false;
+	// 		if (token_not(c[7],"symbol","{"))
+	// 			return false;
+	// 		if (c[8]->getType() != "statements" && c[8]->getType() != "varDec")
+	// 			return false;
+	// 		if (token_not(c[9],"symbol","}"))
+	// 			return false;
 
-		} else if (c[5]->getType() == "statements" || c[5]->getType() == "varDec"){
-			if (token_not(c[6],"symbol","}"))
-				return false;
+	// 	} else if (c[5]->getType() == "statements" || c[5]->getType() == "varDec"){
+	// 		if (token_not(c[6],"symbol","}"))
+	// 			return false;
 
-			if (token_not(c[7],"keyword","else"))
-				return false;
+	// 		if (token_not(c[7],"keyword","else"))
+	// 			return false;
 
-			if (token_not(c[8],"symbol","{"))
-				return false;
+	// 		if (token_not(c[8],"symbol","{"))
+	// 			return false;
 
-			if (token_not(c[9],"symbol","}"))
-				return false;
-		} else return false;
+	// 		if (token_not(c[9],"symbol","}"))
+	// 			return false;
+	// 	} else return false;
 
-	} else if (c.size() == 11) {
+	// } 
+	else if (c.size() == 11) {
 		if (token_not(c[0],"keyword","if"))
 			return false; 
 

@@ -6,6 +6,48 @@
 #include "ParseTree.h"
 #include "Token.h"
 
+/*
+TEMPLATE
+bool test() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "test";
+	std::string s = "let a [ skip ] = skip;";
+	tokens.push_back(new Token("keyword", "let"));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "["));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", "]"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ";"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileStatements();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
+
+*/
+
 int totalFailedCases = 0;
 std::vector<std::string> failedTestCases;
 const std::string red("\033[0;31m");
@@ -1092,7 +1134,7 @@ bool ifTest1(){
 bool ifTest2(){
 
 	std::string s = "if (skip) {} else {}";
-	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+	std::cout << "Testing code - Expecting: Valid tree (not really)\n" << s << std::endl<< std::endl;
     std::vector<Token*> tokens;
   tokens.push_back(new Token("keyword", "if"));
 	tokens.push_back(new Token("symbol", "("));
@@ -1166,12 +1208,11 @@ bool ifTest3(){
 
 bool ifTest4(){
 
-	std::string s = "if (skip) {}";
-	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+	std::string s = "if () {}";
+	std::cout << "Testing code - Expecting: valid tree\n" << s << std::endl<< std::endl;
     std::vector<Token*> tokens;
   tokens.push_back(new Token("keyword", "if"));
 	tokens.push_back(new Token("symbol", "("));
-		tokens.push_back(new Token("keyword", "skip"));
 	tokens.push_back(new Token("symbol", ")"));
 	tokens.push_back(new Token("symbol", "{"));
 	tokens.push_back(new Token("symbol", "}"));
@@ -1263,6 +1304,41 @@ bool ifTest6(){
 	}
 
 	failedTestCases.push_back("if-statement Test 6");
+	totalFailedCases++;
+	return false;
+}
+bool ifTest7() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "if test 7";
+	std::string s = "if ( skip ) { }";
+	tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
 	totalFailedCases++;
 	return false;
 }
@@ -1495,6 +1571,7 @@ int main(int argc, const char *argv[]){
 	printResult(ifTest4(), i++);
 	printResult(ifTest5(), i++);
 	printResult(ifTest6(), i++);
+	printResult(ifTest7(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "STARTING WHILE-STATEMENT TESTS\n";
