@@ -942,21 +942,92 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
 	return true;
 }
 
+// // compileExpression() for all other sections (skip as placeholder)
+// /**
+//  * Generates a parse tree for an expression
+//  */
+// ParseTree *CompilerParser::compileExpression() {
+// 	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
+// 	tree->addChild(new Token("keyword", "skip"));
+// 	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";") && token_not(tlist.peek(), "symbol", "]"))
+// 		tlist.process_token();
+// 	return tree;
+// }
+
 /**
  * Generates a parse tree for an expression
  */
 ParseTree *CompilerParser::compileExpression() {
 	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
-	tree->addChild(new Token("keyword", "skip"));
-	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";") && token_not(tlist.peek(), "symbol", "]"))
-		tlist.process_token();
+	
+	ParseTree *x = tlist.peek();
+	if (token_is(x, "keyword", "skip")) {
+		tree->addChild(tlist.process_token()); // keyword: skip
+		return tree;
+	}
+
+
+	auto is_op = [](ParseTree* a){
+		if (a==nullptr) return false;
+		if (a->getType() == "symbol"){
+			if (gdef::ops.find(a->getValue()) != gdef::keywords.end())
+				return true;
+		}
+		return false;
+	};
+	auto is_ender = [](ParseTree* a) {
+		// if is ), ], ;, or }
+		if (a==nullptr) return true;
+		if (token_is(a, "symbol", ")"))	return true;
+		if (token_is(a, "symbol", "]"))	return true;
+		if (token_is(a, "symbol", ";"))	return true;
+		if (token_is(a, "symbol", "}"))	return true;
+		return false;
+	};
+	/*
+		put everything in a term unless it is a symbol (operator)
+	*/
+	while(is_ender(x) == false) { // all 'ending/ender' tokens nested should be consumed by compileTerm
+		if (is_op(x))
+			tree->addChild(tlist.process_token());
+		else
+		 tree->addChild(compileTerm());
+		
+		x = tlist.peek();
+	}
+
+	// validate
+	
 	return tree;
 }
+
 
 /**
  * Generates a parse tree for an expression term
  */
-ParseTree *CompilerParser::compileTerm() { return NULL; }
+ParseTree *CompilerParser::compileTerm() {
+	ParseTree *tree = new ParseTree("term","");
+
+	ParseTree *x = tlist.peek();
+	if (token_not(x, "symbol", "(")) { // if there is no open bracket, it must be a simple term with only one token
+		tree->addChild(tlist.process_token());
+		return tree;
+	} else if (token_is(x, "symbol", "(")) {
+		tree->addChild(tlist.process_token()); // symbol: (, parse to next ')'
+		x = tlist.peek();
+		
+		while (token_not(x, "symbol", ")")) {
+			tree->addChild(compileExpression());
+			x = tlist.peek();
+		}
+		if (token_is(x, "symbol", ")"))
+			tree->addChild(tlist.process_token());
+		else throw ParseException();
+
+	} else throw ParseException();
+
+	return tree;
+}
 
 /**
  * Generates a parse tree for an expression list

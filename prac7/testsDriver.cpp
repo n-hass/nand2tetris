@@ -1580,6 +1580,44 @@ bool whileTest5() {
 	return false;
 }
 
+
+bool expressionTest1() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string caseName = "expression test 1";
+	std::string s = "1 + ( a + b )";
+	tokens.push_back(new Token("integerConstant", "1"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "+"));
+	tokens.push_back(new Token("identifier", "b"));
+	tokens.push_back(new Token("symbol", ")"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileExpression();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back(caseName);
+	totalFailedCases++;
+	return false;
+}
+
 void printResult(bool result, int testNum){
 
 	if(result){
@@ -1678,6 +1716,11 @@ int main(int argc, const char *argv[]){
 	printResult(whileTest4(), i++);
 	printResult(whileTest5(), i++);
 
+	std::cout << "=========================\n";
+	std::cout << "STARTING EXPRESSION TESTS\n";
+	std::cout << "=========================\n";
+	i = 1;
+	printResult(expressionTest1(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "TEST SUMMARY\n";

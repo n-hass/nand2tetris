@@ -95,6 +95,11 @@ namespace gdef {
   const std::unordered_set<std::string> vartypes {
     "int", "char", "boolean"
   };
+  
+  const std::unordered_set<std::string> ops {
+    "+", "-", "*", "/",
+		"&", "|", "<", ">", "=", "~"
+  };
 
   /*
 	  directly maps a keyword token to a ParseTree type (if such a mapping exists)
