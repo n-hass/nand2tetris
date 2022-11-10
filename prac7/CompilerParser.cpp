@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -107,6 +108,17 @@ Token* TokenList::process_token() {
 	_tks.pop_front();
 
 	return t;
+}
+string TokenList::tostring() {
+	std::list<Token*>::iterator it;
+	it = _tks.begin();
+	string out = "";
+	while (it != _tks.end()) {
+		out += (*it)->tostring();
+		advance(it,1);
+	}
+
+	return (*it)->getValue();
 }
 
 /**
@@ -536,9 +548,11 @@ ParseTree *CompilerParser::compileStatements() {
 			tree->addChild(compileLet());
 		else if (x->getValue() == "return")
 			tree->addChild(compileReturn());
+		else throw ParseException();
 
 		x = tlist.peek(); // for next iteration
 	}
+
 	// do something here. Check the loop exited for the right reason, ie, why should a block of statements end? next thing is varDec or }?
 
 	return tree;
@@ -686,7 +700,7 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 	}
 	else if ( (c.size() == 7) ) {
 		if (token_not(c[0],"keyword","if"))
-		return false; 
+			return false; 
 
 		if (token_not(c[1],"symbol","("))
 			return false; 
@@ -837,13 +851,16 @@ ParseTree *CompilerParser::compileWhile() {
 	};
 
 	// code block of the if statement. can contain statements and/or varDecs
-	ParseTree *x = tlist.peek();
-	while(is_end(x) == false) {
+	ParseTree *x = tlist.peek(); int j=0;
+	while(is_end(x) == false && j < 30) {
+		cout << "DEBUG:" << x->tostring() << endl;
+
 		if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 			tree->addChild(compileVarDec());
 		else if (is_statement(x))
 		 tree->addChild(compileStatements());
 		x = tlist.peek();
+		j++;
 	}
 	tree->addChild(tlist.process_token()); // symbol: }
 

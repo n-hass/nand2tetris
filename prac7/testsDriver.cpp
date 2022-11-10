@@ -907,15 +907,11 @@ return false;
 
 bool statementsTest4(){
 
-	std::string s = "while (skip) {}";
-	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+	std::string s = "do skip";
+	std::cout << "Testing code - Expecting: error\n" << s << std::endl<< std::endl;
     std::vector<Token*> tokens;
-    tokens.push_back(new Token("keyword", "while"));
-    tokens.push_back(new Token("symbol", "("));
+    tokens.push_back(new Token("keyword", "do"));
     tokens.push_back(new Token("keyword", "skip"));
-    tokens.push_back(new Token("symbol", ")"));
-    tokens.push_back(new Token("symbol", "{"));
-    tokens.push_back(new Token("symbol", "}"));
 	bool error = false;
 
 
@@ -929,7 +925,7 @@ bool statementsTest4(){
 		std::cout << "Error while parsing!\n";
 	}
 
-	if(!error){
+	if(error){
 
 		return true;
 	}
@@ -941,20 +937,14 @@ return false;
 
 bool statementsTest5(){
 
-	std::string s = "while (skip) {let a = skip;}";
+	std::string s = "let a = skip;";
 	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
-    std::vector<Token*> tokens;
-    tokens.push_back(new Token("keyword", "while"));
-	tokens.push_back(new Token("symbol", "("));
-    tokens.push_back(new Token("keyword", "skip"));
-    tokens.push_back(new Token("symbol", ")"));
-	tokens.push_back(new Token("symbol", "{"));
-    tokens.push_back(new Token("keyword", "let"));
-    tokens.push_back(new Token("identifier", "a"));
-    tokens.push_back(new Token("symbol", "="));
-    tokens.push_back(new Token("keyword", "skip"));
+  std::vector<Token*> tokens;
+	tokens.push_back(new Token("keyword", "let"));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("keyword", "skip"));
 	tokens.push_back(new Token("symbol", ";"));
-    tokens.push_back(new Token("symbol", "}"));
 	bool error = false;
 
 
@@ -977,6 +967,37 @@ bool statementsTest5(){
 	totalFailedCases++;
 return false;
 
+}
+
+bool statementsTest6(){
+
+	std::string s = "do skip ;";
+	std::cout << "Testing code - Expecting: error\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+    tokens.push_back(new Token("keyword", "do"));
+    tokens.push_back(new Token("keyword", "skip"));
+    tokens.push_back(new Token("symbol", ";"));
+	bool error = false;
+
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileStatements();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("Statements Test 4");
+	totalFailedCases++;
+	return false;
 }
 
 bool ifTest1(){
@@ -1239,7 +1260,7 @@ bool whileTest1(){
 		return true;
 	}
 
-	failedTestCases.push_back("if-statement Test 6");
+	failedTestCases.push_back("while-statement Test 1");
 	totalFailedCases++;
 	return false;
 }
@@ -1270,11 +1291,10 @@ bool whileTest2(){
 		return true;
 	}
 
-	failedTestCases.push_back("if-statement Test 6");
+	failedTestCases.push_back("while-statement Test 2");
 	totalFailedCases++;
 	return false;
 }
-
 bool whileTest3(){
 
 	std::string s = "while (x = 3) }";
@@ -1306,7 +1326,51 @@ bool whileTest3(){
 		return true;
 	}
 
-	failedTestCases.push_back("if-statement Test 6");
+	failedTestCases.push_back("while-statement Test 3");
+	totalFailedCases++;
+	return false;
+}
+bool whileTest4(){
+
+	std::string s = "while (x = 3) {let x = y; do y();}";
+	std::cout << "Testing code - Expecting: Valid tree\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "while"));
+	tokens.push_back(new Token("symbol", "("));
+	tokens.push_back(new Token("identfier", "x"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("integerConstant", "3"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("keyword", "let"));
+	tokens.push_back(new Token("identifier", "x"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("expression", "y"));
+	tokens.push_back(new Token("symbol", ";"));
+	tokens.push_back(new Token("keyword", "do"));
+	tokens.push_back(new Token("expression", "y()"));
+	tokens.push_back(new Token("symbol", ";"));
+	tokens.push_back(new Token("symbol", "}"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileWhile();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("while-statement Test 4");
 	totalFailedCases++;
 	return false;
 }
@@ -1382,6 +1446,7 @@ int main(int argc, const char *argv[]){
 	printResult(statementsTest3(), i++);
 	printResult(statementsTest4(), i++);
 	printResult(statementsTest5(), i++);
+	printResult(statementsTest6(), i++);
 	
 
 	std::cout << "=========================\n";
@@ -1402,6 +1467,7 @@ int main(int argc, const char *argv[]){
 	printResult(whileTest1(), i++);
 	printResult(whileTest2(), i++);
 	printResult(whileTest3(), i++);
+	printResult(whileTest4(), i++);
 
 
 	std::cout << "=========================\n";

@@ -20,6 +20,7 @@ struct TokenList {
   Token* peek(); // used when you only want to see the next token, there is no processing or deletion from the list
   std::string peek_val(int i);
   std::string peek_type(int i);
+  std::string tostring();
 
 
   private:
