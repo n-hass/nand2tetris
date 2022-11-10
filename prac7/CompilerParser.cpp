@@ -580,6 +580,15 @@ ParseTree *CompilerParser::compileLet() {
 
 	tree->addChild(tlist.process_token()); // keyword: let
 	tree->addChild(tlist.process_token()); // an identifier
+	
+	ParseTree *x = tlist.peek();
+	if (token_is(x, "symbol", "[")) {
+		tree->addChild(tlist.process_token()); // symbol: [
+		tree->addChild(compileExpression()); 	 // expression contained in the access operator
+		tree->addChild(tlist.process_token()); // symbol: ]
+	} else if (token_not(x, "symbol", "="))
+		throw ParseException();
+
 	tree->addChild(tlist.process_token()); // symbol: =
 
 	tree->addChild(compileExpression()); // the expression to evaluate
@@ -596,25 +605,38 @@ bool CompilerParser::validateLet(ParseTree *tree) {
 		return false;
 
 	vector<ParseTree*> c = tree->getChildren();
-
-	if (c.size() != 5)
-		return false;
 	
-	
+	// children contents checking
 	if (token_not(c[0],"keyword","let"))
 		return false; 
 
 	if (c[1]->getType() != "identifier")
 		return false;
-	
-	if (token_not(c[2],"symbol","="))
-		return false; 
 
-	if (c[3]->getType() != "expression")
-		return false;
+	if (c.size() == 5){
+		if (token_not(c[2],"symbol","="))
+			return false; 
+		if (c[3]->getType() != "expression")
+			return false;
+		if (token_not(c[4],"symbol",";"))
+			return false; 
+	} else if (c.size() == 8) {
+		if (token_not(c[2],"symbol","["))
+			return false; 
 
-	if (token_not(c[4],"symbol",";"))
-		return false; 
+		if (c[3]->getType() != "expression")
+			return false;
+
+		if (token_not(c[4],"symbol","]"))
+			return false;
+
+		if (token_not(c[5],"symbol","="))
+			return false; 
+		if (c[6]->getType() != "expression")
+			return false;
+		if (token_not(c[7],"symbol",";"))
+			return false; 
+	} else return false;
 
 	return true;
 }
@@ -1004,7 +1026,7 @@ bool CompilerParser::validateReturn(ParseTree *tree) {
 ParseTree *CompilerParser::compileExpression() {
 	ParseTree *tree = new ParseTree("expression", ""); // TEMPORARY SKIP
 	tree->addChild(new Token("keyword", "skip"));
-	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";"))
+	while (token_not(tlist.peek(), "symbol", ")") && token_not(tlist.peek(), "symbol", ";") && token_not(tlist.peek(), "symbol", "]"))
 		tlist.process_token();
 	return tree;
 }

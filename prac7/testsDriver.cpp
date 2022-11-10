@@ -968,11 +968,10 @@ bool statementsTest5(){
 return false;
 
 }
-
 bool statementsTest6(){
 
 	std::string s = "do skip ;";
-	std::cout << "Testing code - Expecting: error\n" << s << std::endl<< std::endl;
+	std::cout << "Testing code - Expecting: Valid tree\n" << s << std::endl<< std::endl;
     std::vector<Token*> tokens;
     tokens.push_back(new Token("keyword", "do"));
     tokens.push_back(new Token("keyword", "skip"));
@@ -996,6 +995,42 @@ bool statementsTest6(){
 	}
 
 	failedTestCases.push_back("Statements Test 4");
+	totalFailedCases++;
+	return false;
+}
+bool statementsTest7() {
+	std::vector<Token*> tokens;
+	///////////////////////////////////////////////////////////////
+	bool validcase = true;
+	std::string s = "let a [ skip ] = skip;";
+	tokens.push_back(new Token("keyword", "let"));
+	tokens.push_back(new Token("identifier", "a"));
+	tokens.push_back(new Token("symbol", "["));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", "]"));
+	tokens.push_back(new Token("symbol", "="));
+	tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ";"));
+	///////////////////////////////////////////////////////////////
+
+	std::cout << "Testing code - Expecting: "<<(validcase?"Valid tree":"error")<<"\n" << s << std::endl<< std::endl;
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileStatements();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error != validcase){
+		return true;
+	}
+
+	failedTestCases.push_back("Statements Test 7");
 	totalFailedCases++;
 	return false;
 }
@@ -1447,6 +1482,7 @@ int main(int argc, const char *argv[]){
 	printResult(statementsTest4(), i++);
 	printResult(statementsTest5(), i++);
 	printResult(statementsTest6(), i++);
+	printResult(statementsTest7(), i++);
 	
 
 	std::cout << "=========================\n";
