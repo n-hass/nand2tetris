@@ -708,6 +708,8 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 
 	vector<ParseTree*> c = tree->getChildren();
 
+	if (c.size() == 6 || c.size() == 9 || c.size() == 10) // test if you should abort here for if statements
+		return false;
 	/*
 		6 = if with no statement body, 
 		7 = if with no else, 
