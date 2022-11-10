@@ -91,7 +91,8 @@ Token* TokenList::process_token() {
 
 		// checks if a string consists of only digits, upper/lower case letters and underscore
 		auto validstring = [](const string& a) {
-			if(a.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_") == string::npos)
+			// NOTE THE ADDED PARENTHESIS
+			if(a.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_()") == string::npos)
 				return true;
 			return false;
 		};
@@ -328,7 +329,9 @@ bool CompilerParser::validateSubroutine(ParseTree *tree) {
 		c[0]->getValue()!="function"
 	)) return false;
 
-	if (c[1]->getType()!="keyword" || ( // subroutine return type
+	if (c[1]->getType() == "identifier"){ // subroutine return type
+		// do nothing
+	} else if (c[1]->getType() != "keyword" || (
 		gdef::vartypes.find(c[1]->getValue()) == gdef::vartypes.end() &&
 		c[1]->getValue() != "void"
 	)) return false;
@@ -536,6 +539,7 @@ ParseTree *CompilerParser::compileStatements() {
 
 		x = tlist.peek(); // for next iteration
 	}
+	// do something here. Check the loop exited for the right reason, ie, why should a block of statements end? next thing is varDec or }?
 
 	return tree;
 }
@@ -620,6 +624,7 @@ ParseTree *CompilerParser::compileIf() {
 	if (token_is(x, "keyword", "else")) {
 		tree->addChild(tlist.process_token()); // keyword: else
 		tree->addChild(tlist.process_token()); // symbol: {
+		x = tlist.peek();
 		while(is_end(x) == false) {
 			if (x->getType() == "keyword" && x->getValue() == "var") // if is a varDec
 				tree->addChild(compileVarDec());
@@ -628,9 +633,11 @@ ParseTree *CompilerParser::compileIf() {
 
 			x = tlist.peek();
 		}
+		if (token_not(tlist.peek(),"symbol","}")) throw ParseException();
 		tree->addChild(tlist.process_token()); // symbol: }
 	}
 
+	if (token_is(x, "symbol", "{")) throw ParseException(); // an open brace after the if. probably missing an 'else' keyword
 	if (validateIf(tree) == false) throw ParseException();
 
 	return tree;
@@ -642,45 +649,158 @@ bool CompilerParser::validateIf(ParseTree *tree) {
 
 	vector<ParseTree*> c = tree->getChildren();
 
-	if (c.size() != 7 || c.size() != 11)
-		return false;
-	
-	if (token_not(c[0],"keyword","if"))
+	/*
+		6 = if with no statement body, 
+		7 = if with no else, 
+		9 = if with else but no bodies in either
+		10 = if with else but statement body in only one
+		11 = if with else and body in both
+	*/
+	if ( (c.size() == 6) ) {
+		if (token_not(c[0],"keyword","if"))
+			return false; 
+
+		if (token_not(c[1],"symbol","("))
+			return false; 
+
+		if (c[2]->getType() != "expression")
+			return false;
+		
+		if (token_not(c[3],"symbol",")"))
+			return false; 
+
+		if (token_not(c[4],"symbol","{"))
+			return false;
+
+		if (token_not(c[5],"symbol","}"))
+			return false;
+	}
+	else if ( (c.size() == 7) ) {
+		if (token_not(c[0],"keyword","if"))
 		return false; 
 
-	if (token_not(c[1],"symbol","("))
-		return false; 
+		if (token_not(c[1],"symbol","("))
+			return false; 
 
-	if (c[2]->getType() != "expression")
-		return false;
+		if (c[2]->getType() != "expression")
+			return false;
+		
+		if (token_not(c[3],"symbol",")"))
+			return false; 
+
+		if (token_not(c[4],"symbol","{"))
+			return false;
+
+		if (c[5]->getType() != "statements" && c[5]->getType() != "varDec")
+			return false;
+
+		if (token_not(c[6],"symbol","}"))
+			return false;
+	}
+	else if (c.size() == 9) {
+		if (token_not(c[0],"keyword","if"))
+			return false; 
+
+		if (token_not(c[1],"symbol","("))
+			return false; 
+
+		if (c[2]->getType() != "expression")
+			return false;
+		
+		if (token_not(c[3],"symbol",")"))
+			return false; 
+
+		if (token_not(c[4],"symbol","{"))
+			return false;
+
+		if (token_not(c[5],"symbol","}"))
+			return false;
+
+		if (token_not(c[6],"keyword","else"))
+			return false;
+
+		if (token_not(c[7],"symbol","{"))
+			return false;
+
+		if (token_not(c[8],"symbol","}"))
+			return false;
+	}
+	else if (c.size() == 10) { // either if or else doesnt contain an expression body, must determine
+		if (token_not(c[0],"keyword","if"))
+			return false; 
+
+		if (token_not(c[1],"symbol","("))
+			return false; 
+
+		if (c[2]->getType() != "expression")
+			return false;
+		
+		if (token_not(c[3],"symbol",")"))
+			return false; 
+
+		if (token_not(c[4],"symbol","{"))
+			return false;
+
+		if ( token_is(c[5],"symbol", "}") ) {
+			if (token_not(c[6],"keyword","else"))
+				return false;
+			if (token_not(c[7],"symbol","{"))
+				return false;
+			if (c[8]->getType() != "statements" && c[8]->getType() != "varDec")
+				return false;
+			if (token_not(c[9],"symbol","}"))
+				return false;
+
+		} else if (c[5]->getType() == "statements" || c[5]->getType() == "varDec"){
+			if (token_not(c[6],"symbol","}"))
+				return false;
+
+			if (token_not(c[7],"keyword","else"))
+				return false;
+
+			if (token_not(c[8],"symbol","{"))
+				return false;
+
+			if (token_not(c[9],"symbol","}"))
+				return false;
+		} else return false;
+
+	} else if (c.size() == 11) {
+		if (token_not(c[0],"keyword","if"))
+			return false; 
+
+		if (token_not(c[1],"symbol","("))
+			return false; 
+
+		if (c[2]->getType() != "expression")
+			return false;
+		
+		if (token_not(c[3],"symbol",")"))
+			return false; 
+
+		if (token_not(c[4],"symbol","{"))
+			return false;
+
+		if (c[5]->getType() != "statements" && c[5]->getType() != "varDec")
+			return false;
+
+		if (token_not(c[6],"symbol","}"))
+			return false;
+
+		if (token_not(c[7],"keyword","else"))
+			return false;
+
+		if (token_not(c[8],"symbol","{"))
+			return false;
+
+		if (c[9]->getType() != "statements" && c[9]->getType() != "varDec")
+			return false;
+
+		if (token_not(c[10],"symbol","}"))
+			return false;
+
+	} else return false;
 	
-	if (token_not(c[3],"symbol",")"))
-		return false; 
-
-	if (token_not(c[4],"symbol","{"))
-		return false;
-
-	if (c[5]->getType() != "statements" && c[5]->getType() != "varDec")
-		return false;
-
-	if (token_not(c[6],"symbol","}"))
-		return false;
-	
-	if (c.size() == 7) // if this is the end of the tree
-		return true;
-
-	if (token_not(c[7],"keyword","else"))
-		return false;
-
-	if (token_not(c[8],"symbol","{"))
-		return false;
-
-	if (c[9]->getType() != "statements" && c[9]->getType() != "varDec")
-		return false;
-
-	if (token_not(c[10],"symbol","}"))
-		return false;
-
 	return true;
 }
 

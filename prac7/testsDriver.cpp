@@ -715,7 +715,7 @@ return false;
 
 }
 
-bool subroutineTest4(){
+bool subroutineTest4() {
 
 	std::string s = "function void myFunc ) {}";
 	std::cout << "Testing code - Expecting: Error\n" << s << std::endl<< std::endl;
@@ -746,7 +746,43 @@ bool subroutineTest4(){
 
 	failedTestCases.push_back("Subroutine Test 4");
 	totalFailedCases++;
-return false;
+	return false;
+
+}
+
+bool subroutineTest5(){
+
+	std::string s = "function int test () {}";
+	std::cout << "Testing code - Expecting: Valid tree\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+    tokens.push_back(new Token("keyword", "function"));
+    tokens.push_back(new Token("keyword", "int"));
+    tokens.push_back(new Token("identifier", "test"));
+    tokens.push_back(new Token("symbol", "("));
+    tokens.push_back(new Token("symbol", ")"));
+    tokens.push_back(new Token("symbol", "{"));
+    tokens.push_back(new Token("symbol", "}"));
+	bool error = false;
+
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileSubroutine();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("Subroutine Test 5");
+	totalFailedCases++;
+	return false;
 
 }
 
@@ -901,7 +937,6 @@ bool statementsTest4(){
 	failedTestCases.push_back("Statements Test 4");
 	totalFailedCases++;
 return false;
-
 }
 
 bool statementsTest5(){
@@ -942,6 +977,170 @@ bool statementsTest5(){
 	totalFailedCases++;
 return false;
 
+}
+
+bool ifTest1(){
+
+	std::string s = "if (skip) {let a = skip; do x(); } else {do y();}";
+	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+		tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+
+    tokens.push_back(new Token("keyword", "let"));
+    tokens.push_back(new Token("identifier", "a"));
+    tokens.push_back(new Token("symbol", "="));
+    tokens.push_back(new Token("keyword", "skip"));
+		tokens.push_back(new Token("symbol", ";"));
+
+		tokens.push_back(new Token("keyword", "do"));
+    tokens.push_back(new Token("identifier", "x()")); // check this
+		tokens.push_back(new Token("symbol", ";"));
+
+	tokens.push_back(new Token("symbol", "}"));
+	tokens.push_back(new Token("keyword", "else"));
+	tokens.push_back(new Token("symbol", "{"));
+		tokens.push_back(new Token("keyword", "do"));
+		tokens.push_back(new Token("identifier", "y()")); // check this
+		tokens.push_back(new Token("symbol", ";"));
+	tokens.push_back(new Token("symbol", "}"));
+
+
+	bool error = false;
+
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 1");
+	totalFailedCases++;
+	return false;
+
+}
+
+bool ifTest2(){
+
+	std::string s = "if (skip) {} else {}";
+	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+		tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+	tokens.push_back(new Token("keyword", "else"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 2");
+	totalFailedCases++;
+	return false;
+}
+
+bool ifTest3(){
+
+	std::string s = "if (skip) {} {}";
+	std::cout << "Testing code - Expecting: error\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+		tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 3");
+	totalFailedCases++;
+	return false;
+}
+
+bool ifTest4(){
+
+	std::string s = "if (skip) {}";
+	std::cout << "Testing code - Expecting: Valid Tree\n" << s << std::endl<< std::endl;
+    std::vector<Token*> tokens;
+  tokens.push_back(new Token("keyword", "if"));
+	tokens.push_back(new Token("symbol", "("));
+		tokens.push_back(new Token("keyword", "skip"));
+	tokens.push_back(new Token("symbol", ")"));
+	tokens.push_back(new Token("symbol", "{"));
+	tokens.push_back(new Token("symbol", "}"));
+
+
+	bool error = false;
+
+	CompilerParser parser = CompilerParser(tokens);
+	try {
+
+		ParseTree* tree = parser.compileIf();
+		std::cout << tree->tostring();
+	} catch (ParseException e) {
+		error = true;
+		std::cout << "Error while parsing!\n";
+	}
+
+	if(!error){
+
+		return true;
+	}
+
+	failedTestCases.push_back("if-statement Test 4");
+	totalFailedCases++;
+	return false;
 }
 
 void printResult(bool result, int testNum){
@@ -1004,6 +1203,7 @@ int main(int argc, const char *argv[]){
 	printResult(subroutineTest2(), i++);
 	printResult(subroutineTest3(), i++);
 	printResult(subroutineTest4(), i++);
+	printResult(subroutineTest5(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "STARTING STATEMENTS TESTS\n";
@@ -1014,7 +1214,16 @@ int main(int argc, const char *argv[]){
 	printResult(statementsTest3(), i++);
 	printResult(statementsTest4(), i++);
 	printResult(statementsTest5(), i++);
+	
 
+	std::cout << "=========================\n";
+	std::cout << "STARTING IF-STATEMENT TESTS\n";
+	std::cout << "=========================\n";
+	i = 1;
+	printResult(ifTest1(), i++);
+	printResult(ifTest2(), i++);
+	printResult(ifTest3(), i++);
+	printResult(ifTest4(), i++);
 
 	std::cout << "=========================\n";
 	std::cout << "TEST SUMMARY\n";
